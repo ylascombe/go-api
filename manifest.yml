@@ -1,0 +1,18 @@
+---
+format_version: 0.1
+
+reactive_platform:
+ version: 3.1.2
+ extra_vars: []
+
+applications:
+  - name: colis360
+    spark:
+      version: 1.4.2
+      extra_vars: []
+    api:
+     version: 1.4.3
+     extra_vars: []
+
+...
+
