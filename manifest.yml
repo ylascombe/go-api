@@ -1,9 +1,8 @@
----
-format_version: "0.1"
+format_version: 0.1
 
 reactive_platform:
   version: 3.1.2
-  extra_vars: []
+  extra_vars: toto
 
 applications:
   - name: colis360
@@ -12,7 +11,7 @@ applications:
       extra_vars: []
     api:
      version: 1.4.3
-     extra_vars: []
+     extra_vars: toto
 
 ...
 
