@@ -28,10 +28,18 @@ func TestParseManifest(t *testing.T) {
 	assert.Equal(t, 1, len(manifest.Applications))
 	//assert.Equal(t, "1.4.2", len(manifest.Applications[0].Spark.Version))
 }
-func TestParseReactivePlatform(t *testing.T) {
+
+func TestParseManifestReactivePlatform(t *testing.T) {
 	manifest := unmarshall([]byte(YAML))
 	assert.Equal(t, "3.1.2", manifest.ReactPlatform.Version)
 	assert.Equal(t, 2, len(manifest.ReactPlatform.ExtraVars))
 	assert.Equal(t, "value1", manifest.ReactPlatform.ExtraVars["var1"])
 	assert.Equal(t, "value2", manifest.ReactPlatform.ExtraVars["var2"])
+}
+
+func TestParseManifestApplications(t *testing.T) {
+	manifest := unmarshall([]byte(YAML))
+	assert.Equal(t, 1, len(manifest.Applications))
+	assert.Equal(t, "colis360", manifest.Applications[0].Name)
+	assert.Equal(t, Spark{}, manifest.Applications[0].Spark)
 }
