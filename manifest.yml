@@ -3,15 +3,22 @@ format_version: 0.1
 reactive_platform:
   version: 3.1.2
   extra_vars: toto
+  feature_status:
+    spark1: present
+    spark2: present
 
 applications:
   - name: colis360
     spark:
       version: 1.4.2
-      extra_vars: tutu
+      extra_vars:
+        var3: value3
+        var4: value4
     api:
-     version: 1.4.3
-     extra_vars: toto
+      version: 1.4.3
+      extra_vars:
+        var5: value5
+        var6: value6
 
 ...
 

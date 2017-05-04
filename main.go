@@ -22,6 +22,7 @@ type Manifest struct {
 type ReactivePlatform struct {
 	Version   string `json:"version" yaml:"version"`
 	ExtraVars map[string]string `json:"extra_vars" yaml:"extra_vars"`
+	FeaturesStatus map[string]string `json:"features_status" yaml:"features_status"`
 }
 
 type Application struct {
@@ -31,13 +32,13 @@ type Application struct {
 }
 
 type Spark struct {
-	//Version   string `json:"version" yaml:"version"`
-	//ExtraVars string `json:"extra_vars" yaml:"extra_vars"`
+	Version   string `json:"version" yaml:"version"`
+	ExtraVars map[string]string `json:"extra_vars" yaml:"extra_vars"`
 }
 
 type Api struct {
-	//Version   string `json:"version" yaml:"version"`
-	//ExtraVars string `json:"extra_vars" yaml:"extra_vars"`
+	Version   string `json:"version" yaml:"version"`
+	ExtraVars map[string]string `json:"extra_vars" yaml:"extra_vars"`
 }
 
 func main() {
