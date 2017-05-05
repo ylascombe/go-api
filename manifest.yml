@@ -2,10 +2,12 @@ format_version: 0.1
 
 reactive_platform:
   version: 3.1.2
-  extra_vars: toto
-  feature_status:
+  extra_vars:
+    var1: value1
+    var2: value2
+  features_status:
     spark1: present
-    spark2: present
+    spark2: absent
 
 applications:
   - name: colis360
@@ -19,6 +21,3 @@ applications:
       extra_vars:
         var5: value5
         var6: value6
-
-...
-

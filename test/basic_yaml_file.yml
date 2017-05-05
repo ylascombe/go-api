@@ -1,0 +1,10 @@
+---
+reactive_platform:
+  version: 3.1.2
+  extra_vars:
+    var1: value1
+    var2: value2
+  features_status:
+    spark1: present
+    spark2: absent
+...

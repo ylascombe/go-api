@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
+	"strings"
 )
 
 const YAML = `format_version: 0.1
@@ -29,6 +30,17 @@ applications:
         var5: value5
         var6: value6
   `
+
+const FILE_CONTENT = `---
+reactive_platform:
+  version: 3.1.2
+  extra_vars:
+    var1: value1
+    var2: value2
+  features_status:
+    spark1: present
+    spark2: absent
+...`
 
 func TestParseManifest(t *testing.T) {
 	manifest := unmarshall([]byte(YAML))
@@ -64,7 +76,13 @@ func TestParseManifestApplications(t *testing.T) {
 	assert.Equal(t, 2, len(manifest.Applications[0].Api.ExtraVars))
 	assert.Equal(t, "value5", manifest.Applications[0].Api.ExtraVars["var5"])
 	assert.Equal(t, "value6", manifest.Applications[0].Api.ExtraVars["var6"])
+}
 
+func TestReadFile(t *testing.T) {
+	fileContent := readFile("test/basic_yaml_file.yml")
 
+	count := len(fileContent)
+	str := strings.Trim(string(fileContent[:count]),"\x00")
+	assert.Equal(t, FILE_CONTENT, str)
 }
 

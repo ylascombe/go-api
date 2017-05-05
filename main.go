@@ -7,9 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	//"github.com/ghodss/yaml"
 	"gopkg.in/yaml.v2"
-	//"encoding/json"
 	"github.com/gorilla/mux"
 )
 
@@ -45,7 +43,7 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", Index)
-	router.HandleFunc("/reac", api)
+	router.HandleFunc("/reactive-platform/target/{target}/manifestversion/{version}", api)
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
@@ -55,27 +53,17 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 func api(w http.ResponseWriter, r *http.Request) {
 
-	file, err := os.Open("manifest.yml") // For read access.
-	if err != nil {
-		log.Fatal(err)
-	}
+	vars := mux.Vars(r)
+	target := vars["target"]
+	version := vars["version"]
+	fmt.Println("target: ", target)
+	fmt.Println("version: ", version)
+	data := readFile("manifest.yml")
 
-	data := make([]byte, 1000)
-	_, err = file.Read(data)
-	if err != nil {
-		log.Fatal(err)
-	}
-	//fmt.Printf("read %d bytes: %q\n", count, data[:count])
-	//config := unmarshall(data[:count])
+	fmt.Println("data: %v", string(data))
+	config := unmarshall(data)
 
-	//data = []byte(`{"format_version": "0.1"}`)
-
-	//count = len(data)
-	//if err := json.Unmarshal(data[:count], &config); err != nil {
-	//	fmt.Printf("err: %v\n", err)
-	//	return
-	//}
-	//fmt.Println("resultat: \n", config)
+	fmt.Println("resultat: \n", config.ReactPlatform.Version)
 }
 
 func unmarshall(yamlText []byte) *Manifest {
@@ -87,4 +75,20 @@ func unmarshall(yamlText []byte) *Manifest {
 	}
 
 	return &config
+}
+
+func readFile(filePath string) []byte {
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	data := make([]byte, 1000)
+	_, err = file.Read(data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	count := len(data)
+	//fmt.Printf("read %d bytes: %q\n", count, data[:count])
+	return data[:count]
 }
