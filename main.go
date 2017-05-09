@@ -10,6 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"errors"
 	"io/ioutil"
+	"sync"
+	"os/exec"
 )
 
 type Manifest struct {
@@ -60,9 +62,20 @@ func api(_ http.ResponseWriter, r *http.Request) {
 	fmt.Println("target: ", target)
 	fmt.Println("version: ", version)
 
-	config, _ :=unmarshallFromFile("manifest.yml")
+	config, _ := unmarshallFromFile("manifest.yml")
 
 	fmt.Println("resultat: \n", config.ReactPlatform.Version)
+
+	var ansibleCommands = [1]string {}
+	ansibleCommands[0] = "ansible-playbook -i inventories/" + target + " plateforme_reactive.yml"
+
+	wg := new(sync.WaitGroup)
+	wg.Add(3)
+	for i:=0; i<len(ansibleCommands); i++ {
+		execCommand(ansibleCommands[i],wg)
+	}
+
+
 }
 
 func unmarshall(yamlText []byte) (*Manifest, error) {
@@ -91,5 +104,16 @@ func unmarshallFromFile(filePath string) (*Manifest, error) {
 	}
 
 	return config, nil
+}
 
+func execCommand(cmd string, wg *sync.WaitGroup) (int, error) {
+	fmt.Println("Prepare to execute command : ", cmd)
+	out, err := exec.Command("sh", "-c", cmd).Output()
+	if err != nil {
+		err_msg := fmt.Sprintf("Error when running %s command. Error details: %v\n", cmd, err)
+		return -1, errors.New(err_msg)
+	}
+	fmt.Printf("\tCommand result : \n\t%s", out)
+	wg.Done()
+	return 0, nil
 }

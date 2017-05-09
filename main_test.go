@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
+	"sync"
 )
 
 const YAML = `format_version: 0.1
@@ -91,4 +92,24 @@ func TestUnmarshallFromFile(t *testing.T) {
 	assert.Equal(t, 2, len(manifest.ReactPlatform.FeaturesStatus))
 	assert.Equal(t, "present", manifest.ReactPlatform.FeaturesStatus["spark1"])
 	assert.Equal(t, "absent", manifest.ReactPlatform.FeaturesStatus["spark2"])
+}
+
+func TestExecCommandBasic(t *testing.T) {
+	wg := new(sync.WaitGroup)
+	wg.Add(3)
+
+	status, err := execCommand("echo 'tutu'", wg)
+
+	assert.Equal(t, 0, status)
+	assert.Equal(t, nil, err)
+}
+
+func TestExecCommandWithSleep(t *testing.T) {
+	wg := new(sync.WaitGroup)
+	wg.Add(3)
+
+	status, err := execCommand("sleep 20; echo tutu", wg)
+
+	assert.Equal(t, 0, status)
+	assert.Equal(t, nil, err)
 }
