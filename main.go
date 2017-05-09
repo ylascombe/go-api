@@ -5,10 +5,11 @@ import (
 	"html"
 	"log"
 	"net/http"
-	"os"
 
 	"gopkg.in/yaml.v2"
 	"github.com/gorilla/mux"
+	"errors"
+	"io/ioutil"
 )
 
 type Manifest struct {
@@ -51,44 +52,44 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 }
 
-func api(w http.ResponseWriter, r *http.Request) {
+func api(_ http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	target := vars["target"]
 	version := vars["version"]
 	fmt.Println("target: ", target)
 	fmt.Println("version: ", version)
-	data := readFile("manifest.yml")
 
-	fmt.Println("data: %v", string(data))
-	config := unmarshall(data)
+	config, _ :=unmarshallFromFile("manifest.yml")
 
 	fmt.Println("resultat: \n", config.ReactPlatform.Version)
 }
 
-func unmarshall(yamlText []byte) *Manifest {
+func unmarshall(yamlText []byte) (*Manifest, error) {
 	var config Manifest
 	var err = yaml.Unmarshal(yamlText, &config)
 	if err != nil {
-		fmt.Printf("err: %v\n", err)
-		return nil
+		err_msg := fmt.Sprintf("Error when reading YAML file. Can't create Manifest Object. Yaml Error: %v\n", err)
+		return nil, errors.New(err_msg)
 	}
 
-	return &config
+	fmt.Println("line", config.ReactPlatform.Version)
+	return &config, nil
 }
 
-func readFile(filePath string) []byte {
-	file, err := os.Open(filePath)
+func unmarshallFromFile(filePath string) (*Manifest, error) {
+	data, err := ioutil.ReadFile(filePath)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	data := make([]byte, 1000)
-	_, err = file.Read(data)
+	config, err := unmarshall([]byte(data))
+
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	count := len(data)
-	//fmt.Printf("read %d bytes: %q\n", count, data[:count])
-	return data[:count]
+
+	return config, nil
+
 }
