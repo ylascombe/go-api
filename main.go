@@ -57,7 +57,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func api(_ http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
-	target := vars["target"]
+	target := vars["target"] + ".ini"
 	version := vars["version"]
 	fmt.Println("target: ", target)
 	fmt.Println("version: ", version)
@@ -66,13 +66,22 @@ func api(_ http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("resultat: \n", config.ReactPlatform.Version)
 
-	var ansibleCommands = [1]string {}
+	var ansibleCommands = [10]string {}
 	ansibleCommands[0] = "ansible-playbook -i inventories/" + target + " plateforme_reactive.yml"
 
+	for i:=0; i<len(config.Applications); i++ {
+		var spark Spark = config.Applications[i].Spark
+		if (Spark {}) != spark  {
+			ansibleCommands[i+1] = "ansible-playbook -i inventories/" + target + " deploy_spark_app.yml"
+		}
+		if (Api{}) != config.Applications[i].Api {
+			ansibleCommands[i+1] = "ansible-playbook -i inventories/" + target + " deploy_apiserver.yml"
+		}
+	}
 	wg := new(sync.WaitGroup)
 	wg.Add(3)
 	for i:=0; i<len(ansibleCommands); i++ {
-		execCommand(ansibleCommands[i],wg)
+		execCommand("echo " + ansibleCommands[i],wg)
 	}
 
 
