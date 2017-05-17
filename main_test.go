@@ -113,3 +113,15 @@ func TestExecCommandWithSleep(t *testing.T) {
 	assert.Equal(t, 0, status)
 	assert.Equal(t, nil, err)
 }
+
+func TestBuildCommand(t *testing.T) {
+	commands := buildCommands("LOCAL.ini", "")
+
+	assert.Equal(t, 5, len(commands))
+	assert.Equal(t, "ansible-playbook -i inventories/LOCAL.ini plateforme_reactive.yml", commands[0])
+	assert.Equal(t, "ansible-playbook -i inventories/LOCAL.ini deploy_spark_app.yml", commands[1])
+	assert.Equal(t, "ansible-playbook -i inventories/LOCAL.ini deploy_apiserver.yml", commands[2])
+	assert.Equal(t, "ansible-playbook -i inventories/LOCAL.ini deploy_spark_app.yml", commands[3])
+	assert.Equal(t, "ansible-playbook -i inventories/LOCAL.ini deploy_apiserver.yml", commands[4])
+	assert.Equal(t, "ansible-playbook -i inventories/LOCAL.ini deploy_apiserver.yml TODO passer les parametres", commands[4])
+}

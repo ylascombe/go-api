@@ -62,22 +62,7 @@ func api(_ http.ResponseWriter, r *http.Request) {
 	fmt.Println("target: ", target)
 	fmt.Println("version: ", version)
 
-	config, _ := unmarshallFromFile("manifest.yml")
-
-	fmt.Println("resultat: \n", config.ReactPlatform.Version)
-
-	var ansibleCommands = [10]string {}
-	ansibleCommands[0] = "ansible-playbook -i inventories/" + target + " plateforme_reactive.yml"
-
-	for i:=0; i<len(config.Applications); i++ {
-		var spark Spark = config.Applications[i].Spark
-		if (Spark {}) != spark  {
-			ansibleCommands[i+1] = "ansible-playbook -i inventories/" + target + " deploy_spark_app.yml"
-		}
-		if (Api{}) != config.Applications[i].Api {
-			ansibleCommands[i+1] = "ansible-playbook -i inventories/" + target + " deploy_apiserver.yml"
-		}
-	}
+	ansibleCommands := buildCommands(target, version)
 	wg := new(sync.WaitGroup)
 	wg.Add(3)
 	for i:=0; i<len(ansibleCommands); i++ {
@@ -85,6 +70,26 @@ func api(_ http.ResponseWriter, r *http.Request) {
 	}
 
 
+}
+
+func buildCommands(target string, manifest string) []string {
+	config, _ := unmarshallFromFile("manifest.yml")
+
+	fmt.Println("resultat: \n", config.ReactPlatform.Version)
+
+	var ansibleCommands = []string {}
+	ansibleCommands = append(ansibleCommands, "ansible-playbook -i inventories/" + target + " plateforme_reactive.yml")
+
+	for i:=0; i<len(config.Applications); i++ {
+		if config.Applications[i].Spark.Version != ""  {
+			ansibleCommands = append(ansibleCommands, "ansible-playbook -i inventories/" + target + " deploy_spark_app.yml")
+		}
+		if config.Applications[i].Api.Version != "" {
+			ansibleCommands = append(ansibleCommands, "ansible-playbook -i inventories/" + target + " deploy_apiserver.yml")
+		}
+	}
+
+	return ansibleCommands
 }
 
 func unmarshall(yamlText []byte) (*Manifest, error) {
