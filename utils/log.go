@@ -14,7 +14,7 @@ var (
 
 func NewLog(logpath string) {
 	println("LogFile: " + logpath)
-	file, err := os.Open(logpath)
+	file, err := os.Create(logpath)
 	if err != nil {
 		panic(err)
 	}
