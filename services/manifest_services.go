@@ -14,7 +14,6 @@ func BuildCommands(target string, manifestUrl string, path_to_vault_password_fil
 	ansibleCommands = append(ansibleCommands, "cd " + config.INIT_POSTE_DEV_PATH)
 	ansibleCommands = append(ansibleCommands, "pwd")
 	ansibleCommands = append(ansibleCommands, ANSIBLE_PLAYBOOK + target + " plateforme_reactive.yml")
-	ansibleCommands = append(ansibleCommands, ANSIBLE_PLAYBOOK + target + " plateforme_reactive.yml")
 
 	for i:=0; i<len(manifest.Applications); i++ {
 
