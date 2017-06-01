@@ -12,6 +12,7 @@ var (
 	Log      *log.Logger
 )
 
+
 func NewLog(logpath string) {
 	println("LogFile: " + logpath)
 	file, err := os.Create(logpath)

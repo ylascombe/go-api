@@ -32,7 +32,7 @@ func TestExecCommandBasic(t *testing.T) {
 
 
 func TestExecCommandAsynchronously(t *testing.T) {
-	commands := [] string {"echo start; sleep 10; echo middle", "sleep 20; echo end"}
+	commands := [] string {"echo start; sleep 4; echo middle", "sleep 8; echo end"}
 	status, err := ExecCommandsAsynchronously(commands)
 
 	assert.True(t, status.ProcessId > 0)

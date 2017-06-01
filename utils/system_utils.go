@@ -6,11 +6,9 @@ import (
 	"os/exec"
 	"errors"
 	"github.com/ylascombe/go-api/models"
-	"flag"
 )
 
 var (
-	logpath = flag.String("logpath", "/tmp/go-api-log.log", "API logs")
 	commands = make(map[models.ResponseTask]*exec.Cmd)
 )
 
@@ -31,15 +29,10 @@ func ExecCommandsAsynchronously(cmd []string) (models.ResponseTask, error) {
 	fmt.Println("start")
 	for i:=0;i<len(cmd);i++ {
 
-		command, err := ExecCommandAsynchronously(cmd[i])
+		command, _ := ExecCommandAsynchronously(cmd[i])
 
-		if err != nil {
-			Log.Println("La tache " + cmd[i] + " a echoué. erreur : ", err)
-		}
-
-		fmt.Println(commands[command].Stderr)
-		fmt.Println(commands[command].Stdout)
-		commands[command].Wait()
+		// If we want to be synchronous :
+		// commands[command].Wait()
 		Log.Println("La tache " + cmd[i] + " a terminé, passage à la suivante")
 
 	}
@@ -53,13 +46,12 @@ func ExecCommandAsynchronously(cmd string) (models.ResponseTask, error) {
 	fmt.Println("Prepare to execute command : ", cmd)
 	command := exec.Command("sh", "-c", cmd)
 
-	flag.Parse()
-	NewLog(*logpath)
+	logPath := fmt.Sprintf("%v%v", "/tmp/", count)
+	NewLog(logPath)
 	Log.Println(cmd)
 	err := command.Start()
 	if err != nil {
 		err_msg := fmt.Sprintf("Error when running %s command. Error details: %v\n", cmd, err)
-		fmt.Println("Error when running %s command. Error details: %v\n", cmd, err)
 		return models.ResponseTask{}, errors.New(err_msg)
 	}
 
@@ -70,6 +62,7 @@ func ExecCommandAsynchronously(cmd string) (models.ResponseTask, error) {
 
 	commands[task] = command
 	Log.Println("Process : ", command.Process.Pid)
+	Log.Println(command.Stdout)
 	return task, nil
 }
 
