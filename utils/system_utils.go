@@ -5,51 +5,58 @@ import (
 	"os/exec"
 	"errors"
 	"github.com/ylascombe/go-api/models"
+	"strings"
 )
 
 
 // TODO is it better to use *sync.WaitGroup as previously ?
 
-func ExecCommandListAsynchronously(cmd []string) ([]models.ResponseTask, error) {
-
+func ExecCommandListAsynchronously(cmds []string) ([]models.ResponseTask, error) {
 	var commands []models.ResponseTask
 	logger := NewLog("/tmp/my.txt")
-	fmt.Println("start")
-	for i:=0;i<len(cmd);i++ {
+	logger.log.Println("start")
+	for i:=0;i<len(cmds);i++ {
 
-		//command, _ := ExecCommandAsynchronously(cmd[i])
-		command, _ := ExecCommandAsynchronously(cmd[i], logger)
+		splittedCmd := strings.SplitN(cmds[i]," ",2)
 
+		cmd := exec.Command(splittedCmd[0], splittedCmd[1])
+		command, err := ExecCommandAsynchronously(cmd, logger)
+
+		if err != nil {
+			return commands, err
+		}
 		commands = append(commands, command)
-		//if err != nil {
-		//	return nil, err
-		//}
+
 		// If we want to be synchronous :
 		// commands[command].Wait()
 
 		logger.log.Println(command)
-		logger.log.Println("La tache " + cmd[i] + " a terminé, passage à la suivante")
+		logger.log.Println("La tache " + cmds[i] + " a terminé, passage à la suivante")
 
 	}
-	fmt.Println("end")
+	logger.log.Println("end")
 
 	return commands, nil
 }
 
-func ExecCommandAsynchronously(cmd string, logger Logger) (models.ResponseTask, error) {
+//func ExecCmdListAsynchronously(cmds []exec.Cmd) ([]models.ResponseTask, error) {
+//}
+
+func ExecCommandAsynchronously(command *exec.Cmd, logger Logger) (models.ResponseTask, error) {
 
 	//logger.log.Println("Prepare to execute command : ", cmd)
-	command := exec.Command("sh", "-c", cmd)
 
 	err := command.Start()
+	//err = command.Wait()
 	if err != nil {
-		err_msg := fmt.Sprintf("Error when running %s command. Error details: %v\n", cmd, err)
+		err_msg := fmt.Sprintf("Error when running %s command. Error details: %v\n", command, err)
+		fmt.Println("error ----" , command.Path)
 		return models.ResponseTask{}, errors.New(err_msg)
 	}
 
 	task := models.ResponseTask{
 		ProcessId: command.Process.Pid,
-		TaskCommand: cmd,
+		TaskCommand: command.Path,
 	}
 
 	//logger.log.Println("Process : ", command.Process.Pid)
