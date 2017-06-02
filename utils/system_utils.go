@@ -1,54 +1,46 @@
 package utils
 
 import (
-	"sync"
 	"fmt"
 	"os/exec"
 	"errors"
 	"github.com/ylascombe/go-api/models"
 )
 
-var (
-	commands = make(map[models.ResponseTask]*exec.Cmd)
-)
 
-func ExecCommand(cmd string, wg *sync.WaitGroup) (int, error) {
-	fmt.Println("Prepare to execute command : ", cmd)
-	out, err := exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		err_msg := fmt.Sprintf("Error when running %s command. Error details: %v\n", cmd, err)
-		return -1, errors.New(err_msg)
-	}
-	fmt.Printf("\tCommand result : \n\t%s", out)
-	wg.Done()
-	return 0, nil
-}
+// TODO is it better to use *sync.WaitGroup as previously ?
 
-func ExecCommandsAsynchronously(cmd []string) (models.ResponseTask, error) {
+func ExecCommandListAsynchronously(cmd []string) ([]models.ResponseTask, error) {
 
+	var commands []models.ResponseTask
+	logger := NewLog("/tmp/my.txt")
 	fmt.Println("start")
 	for i:=0;i<len(cmd);i++ {
 
-		command, _ := ExecCommandAsynchronously(cmd[i])
+		//command, _ := ExecCommandAsynchronously(cmd[i])
+		command, _ := ExecCommandAsynchronously(cmd[i], logger)
 
+		commands = append(commands, command)
+		//if err != nil {
+		//	return nil, err
+		//}
 		// If we want to be synchronous :
 		// commands[command].Wait()
-		Log.Println("La tache " + cmd[i] + " a terminé, passage à la suivante")
+
+		logger.log.Println(command)
+		logger.log.Println("La tache " + cmd[i] + " a terminé, passage à la suivante")
 
 	}
 	fmt.Println("end")
 
-	return models.ResponseTask{}, nil
+	return commands, nil
 }
 
-func ExecCommandAsynchronously(cmd string) (models.ResponseTask, error) {
+func ExecCommandAsynchronously(cmd string, logger Logger) (models.ResponseTask, error) {
 
-	fmt.Println("Prepare to execute command : ", cmd)
+	//logger.log.Println("Prepare to execute command : ", cmd)
 	command := exec.Command("sh", "-c", cmd)
 
-	logPath := fmt.Sprintf("%v%v", "/tmp/", count)
-	NewLog(logPath)
-	Log.Println(cmd)
 	err := command.Start()
 	if err != nil {
 		err_msg := fmt.Sprintf("Error when running %s command. Error details: %v\n", cmd, err)
@@ -60,21 +52,15 @@ func ExecCommandAsynchronously(cmd string) (models.ResponseTask, error) {
 		TaskCommand: cmd,
 	}
 
-	commands[task] = command
-	Log.Println("Process : ", command.Process.Pid)
-	Log.Println(command.Stdout)
+	//logger.log.Println("Process : ", command.Process.Pid)
+	//logger.log.Println(command.Stdout)
 	return task, nil
-}
-
-func IsTerminated(processId int) bool {
-
-	return true
-
 }
 
 func LaunchTestCommands() {
 	commands := [] string {"echo start; sleep 10; echo middle", "sleep 20; echo end"}
-	status, err := ExecCommandsAsynchronously(commands)
-	Log.Println(status)
-	Log.Println(err)
+	status, err := ExecCommandListAsynchronously(commands)
+
+	fmt.Println(status)
+	fmt.Println(err)
 }
