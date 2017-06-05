@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/ylascombe/go-api/models"
 	"strings"
+	"io/ioutil"
 )
 
 
@@ -57,11 +58,22 @@ func ExecCommandAsynchronously(command *exec.Cmd, logger Logger) (models.Respons
 	task := models.ResponseTask{
 		ProcessId: command.Process.Pid,
 		TaskCommand: command.Path,
+		Command: command,
 	}
 
 	//logger.log.Println("Process : ", command.Process.Pid)
 	//logger.log.Println(command.Stdout)
 	return task, nil
+}
+
+func IsTerminated(command *exec.Cmd, logger Logger)  bool {
+	// not
+	return command.ProcessState != nil
+}
+
+func Stdout(command *exec.Cmd) string {
+
+	return ioutil.ReadAll(*command.Stdout)
 }
 
 func LaunchTestCommands() {
