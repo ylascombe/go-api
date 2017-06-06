@@ -1,87 +1,85 @@
 package utils
 
 import (
-	"sync"
 	"fmt"
 	"os/exec"
 	"errors"
 	"github.com/ylascombe/go-api/models"
-	"flag"
+	"strings"
+	"io/ioutil"
 )
 
-var (
-	logpath = flag.String("logpath", "/tmp/go-api-log.log", "API logs")
-	commands = make(map[models.ResponseTask]*exec.Cmd)
-)
 
-func ExecCommand(cmd string, wg *sync.WaitGroup) (int, error) {
-	fmt.Println("Prepare to execute command : ", cmd)
-	out, err := exec.Command("sh", "-c", cmd).Output()
-	if err != nil {
-		err_msg := fmt.Sprintf("Error when running %s command. Error details: %v\n", cmd, err)
-		return -1, errors.New(err_msg)
-	}
-	fmt.Printf("\tCommand result : \n\t%s", out)
-	wg.Done()
-	return 0, nil
-}
+// TODO is it better to use *sync.WaitGroup as previously ?
 
-func ExecCommandsAsynchronously(cmd []string) (models.ResponseTask, error) {
+func ExecCommandListAsynchronously(cmds []string) ([]models.ResponseTask, error) {
+	var commands []models.ResponseTask
+	logger := NewLog("/tmp/my.txt")
+	logger.log.Println("start")
+	for i:=0;i<len(cmds);i++ {
 
-	fmt.Println("start")
-	for i:=0;i<len(cmd);i++ {
+		splittedCmd := strings.SplitN(cmds[i]," ",2)
 
-		command, err := ExecCommandAsynchronously(cmd[i])
+		cmd := exec.Command(splittedCmd[0], splittedCmd[1])
+		command, err := ExecCommandAsynchronously(cmd, logger)
 
 		if err != nil {
-			Log.Println("La tache " + cmd[i] + " a echoué. erreur : ", err)
+			return commands, err
 		}
+		commands = append(commands, command)
 
-		fmt.Println(commands[command].Stderr)
-		fmt.Println(commands[command].Stdout)
-		commands[command].Wait()
-		Log.Println("La tache " + cmd[i] + " a terminé, passage à la suivante")
+		// If we want to be synchronous :
+		// commands[command].Wait()
+
+		logger.log.Println(command)
+		logger.log.Println("La tache " + cmds[i] + " a terminé, passage à la suivante")
 
 	}
-	fmt.Println("end")
+	logger.log.Println("end")
 
-	return models.ResponseTask{}, nil
+	return commands, nil
 }
 
-func ExecCommandAsynchronously(cmd string) (models.ResponseTask, error) {
+//func ExecCmdListAsynchronously(cmds []exec.Cmd) ([]models.ResponseTask, error) {
+//}
 
-	fmt.Println("Prepare to execute command : ", cmd)
-	command := exec.Command("sh", "-c", cmd)
+func ExecCommandAsynchronously(command *exec.Cmd, logger Logger) (models.ResponseTask, error) {
 
-	flag.Parse()
-	NewLog(*logpath)
-	Log.Println(cmd)
+	//logger.log.Println("Prepare to execute command : ", cmd)
+
 	err := command.Start()
+	//err = command.Wait()
 	if err != nil {
-		err_msg := fmt.Sprintf("Error when running %s command. Error details: %v\n", cmd, err)
-		fmt.Println("Error when running %s command. Error details: %v\n", cmd, err)
+		err_msg := fmt.Sprintf("Error when running %s command. Error details: %v\n", command, err)
+		fmt.Println("error ----" , command.Path)
 		return models.ResponseTask{}, errors.New(err_msg)
 	}
 
 	task := models.ResponseTask{
 		ProcessId: command.Process.Pid,
-		TaskCommand: cmd,
+		TaskCommand: command.Path,
+		Command: command,
 	}
 
-	commands[task] = command
-	Log.Println("Process : ", command.Process.Pid)
+	//logger.log.Println("Process : ", command.Process.Pid)
+	//logger.log.Println(command.Stdout)
 	return task, nil
 }
 
-func IsTerminated(processId int) bool {
+func IsTerminated(command *exec.Cmd, logger Logger)  bool {
+	// not
+	return command.ProcessState != nil
+}
 
-	return true
+func Stdout(command *exec.Cmd) string {
 
+	return ioutil.ReadAll(*command.Stdout)
 }
 
 func LaunchTestCommands() {
 	commands := [] string {"echo start; sleep 10; echo middle", "sleep 20; echo end"}
-	status, err := ExecCommandsAsynchronously(commands)
-	Log.Println(status)
-	Log.Println(err)
+	status, err := ExecCommandListAsynchronously(commands)
+
+	fmt.Println(status)
+	fmt.Println(err)
 }

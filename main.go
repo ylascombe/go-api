@@ -44,7 +44,7 @@ func api(writer http.ResponseWriter, r *http.Request) {
 
 	ansibleCommands := services.BuildCommands(target, version, config.VAULT_SECRET_FILE)
 
-	go utils.ExecCommandsAsynchronously(ansibleCommands)
+	go utils.ExecCommandListAsynchronously(ansibleCommands)
 	fmt.Fprintf(writer, "Les commandes ont été lancées")
 }
 
