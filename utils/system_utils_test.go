@@ -3,11 +3,7 @@ package utils
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"fmt"
 	"os/exec"
-	"time"
-	"io"
-	"bytes"
 )
 
 func TestExecCommandAsynchronously(t *testing.T) {
@@ -16,10 +12,10 @@ func TestExecCommandAsynchronously(t *testing.T) {
 	cmd := exec.Command("echo", "tutu")
 	status, err := ExecCommandAsynchronously(cmd, logger)
 
-	fmt.Println(status)
-	fmt.Println(err)
 	assert.True(t, status.ProcessId > 0)
 	assert.Equal(t, nil, err)
+
+	assert.Contains(t, status.StdoutSnapshot() ,"tutu")
 }
 
 func TestExecCommandListAsynchronously(t *testing.T) {
@@ -28,46 +24,47 @@ func TestExecCommandListAsynchronously(t *testing.T) {
 	commands := []string{
 		"echo start",
 		"sleep 4",
-		"echo middle",
+		"echo 'ligne_de_test'",
 		"sleep 8",
 		"echo 'tutu' >> /tmp/tutu.txt",
 		"echo end",
 	}
-	var reader *bytes.Buffer
-	status, err := ExecCommandListAsynchronously(commands)
+	status, err := ExecCommandListAsynchronously(commands, logger)
 
 	assert.Equal(t, 6 , len(status))
 	assert.Equal(t, nil, err)
 
-
 	for i:=0; i<len(status); i++ {
-		val := IsTerminated(status[i].Command, logger)
-		fmt.Print("log : ")
-		reader = Stdout(status[i].Command)
-
-		fmt.Println(reader)
-		fmt.Println(i, " : ", val)
-
+		assert.False(t, IsTerminated(status[i]))
 	}
-	time.Sleep(20 * time.Second)
 
-	assert.Equal(t, "start\nmiddle\nend", reader)
+	WaitForCompletion(status, logger)
 	for i:=0; i<len(status); i++ {
-		val := IsTerminated(status[i].Command, logger)
-
-		fmt.Println(i, " : ", val)
+		assert.True(t, IsTerminated(status[i]))
 	}
+	stdout := status[0].StdoutSnapshot
+	assert.Contains(t, stdout, "ligne_de_test")
 }
 
 func TestExecCommandListAsynchronouslyWhenError(t *testing.T) {
+
+	logger := NewLog("/tmp/TestExecCommandListAsynchronouslyWhenError.txt")
+
 	commands := []string{
 		"echo start",
-
 		"curl -Z", // command that produce an error
 		"echo end",
 	}
-	status, err := ExecCommandListAsynchronously(commands)
+	status, _ := ExecCommandListAsynchronously(commands, logger)
 
-	assert.Equal(t, 2 , len(status))
-	assert.Contains(t, err, "Error when running")
+	assert.Equal(t, 3 , len(status))
+
+	errors := WaitForCompletion(status, logger)
+	assert.NotNil(t, errors)
+	assert.Equal(t, 3, len(errors))
+
+	assert.Nil(t, errors[0])
+	assert.NotNil(t, errors[1])
+	//assert.Equal(t,  reflect.Type(exec.ExitError{}), string(reflect.TypeOf(errors[1]).Kind()))
+	assert.Nil(t, errors[2])
 }
