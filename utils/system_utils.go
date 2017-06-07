@@ -4,17 +4,11 @@ import (
 	"fmt"
 	"os/exec"
 	"errors"
-	"github.com/ylascombe/go-api/models"
 	"strings"
-	"io/ioutil"
 )
 
-
-// TODO is it better to use *sync.WaitGroup as previously ?
-
-func ExecCommandListAsynchronously(cmds []string) ([]models.ResponseTask, error) {
-	var commands []models.ResponseTask
-	logger := NewLog("/tmp/my.txt")
+func ExecCommandListAsynchronously(cmds []string, logger Logger) ([]ResponseTask, error) {
+	var commands []ResponseTask
 	logger.log.Println("start")
 	for i:=0;i<len(cmds);i++ {
 
@@ -43,22 +37,24 @@ func ExecCommandListAsynchronously(cmds []string) ([]models.ResponseTask, error)
 //func ExecCmdListAsynchronously(cmds []exec.Cmd) ([]models.ResponseTask, error) {
 //}
 
-func ExecCommandAsynchronously(command *exec.Cmd, logger Logger) (models.ResponseTask, error) {
+func ExecCommandAsynchronously(command *exec.Cmd, logger Logger) (ResponseTask, error) {
 
 	//logger.log.Println("Prepare to execute command : ", cmd)
 
+	command.Stdout = logger
 	err := command.Start()
 	//err = command.Wait()
 	if err != nil {
 		err_msg := fmt.Sprintf("Error when running %s command. Error details: %v\n", command, err)
 		fmt.Println("error ----" , command.Path)
-		return models.ResponseTask{}, errors.New(err_msg)
+		return ResponseTask{}, errors.New(err_msg)
 	}
 
-	task := models.ResponseTask{
+	task := ResponseTask{
 		ProcessId: command.Process.Pid,
 		TaskCommand: command.Path,
 		Command: command,
+		Logger: &logger,
 	}
 
 	//logger.log.Println("Process : ", command.Process.Pid)
@@ -66,20 +62,25 @@ func ExecCommandAsynchronously(command *exec.Cmd, logger Logger) (models.Respons
 	return task, nil
 }
 
-func IsTerminated(command *exec.Cmd, logger Logger)  bool {
-	// not
-	return command.ProcessState != nil
-}
-
-func Stdout(command *exec.Cmd) string {
-
-	return ioutil.ReadAll(*command.Stdout)
-}
-
+// TODO remove after debug phase
 func LaunchTestCommands() {
+	logger := NewLog("/tmp/LaunchTestCommands.txt")
+
 	commands := [] string {"echo start; sleep 10; echo middle", "sleep 20; echo end"}
-	status, err := ExecCommandListAsynchronously(commands)
+	status, err := ExecCommandListAsynchronously(commands, logger)
 
 	fmt.Println(status)
 	fmt.Println(err)
+}
+
+
+func WaitForCompletion(tasks []ResponseTask, logger Logger) []error {
+	var errors []error = []error{}
+
+	for i:=0;i<len(tasks);i++ {
+		errors = append(errors, tasks[i].Command.Wait())
+		logger.log.Println("Task ", tasks[i].TaskCommand, " is terminated")
+	}
+
+	return errors
 }

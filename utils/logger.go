@@ -10,6 +10,7 @@ import (
 
 type Logger struct {
 	log *log.Logger
+	filepath string
 }
 
 func NewLog(logpath string) Logger{
@@ -17,7 +18,7 @@ func NewLog(logpath string) Logger{
 	if err != nil {
 		panic(err)
 	}
-	return Logger{log.New(file, "", log.LstdFlags|log.Lshortfile)}
+	return Logger{log.New(file, "", log.LstdFlags|log.Lshortfile), logpath}
 }
 
 func (logger Logger) Info(log string) {
@@ -36,4 +37,14 @@ func (logger Logger) Println(log string, cmd exec.Cmd) {
 
 func (logger Logger) Error(log string, cmd exec.Cmd,err error) {
 	logger.log.Println(log)
+}
+
+func (logger Logger) Write(p []byte) (n int, err error) {
+	str := string(p)
+	logger.log.Println(str)
+	return len(str), nil
+}
+
+func (logger Logger) GetLogpath() string {
+	return logger.filepath
 }
