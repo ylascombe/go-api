@@ -1,7 +1,11 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/ylascombe/go-api/gorm_custom"
+)
 
 type Environment struct {
-	gorm.Model
+	gorm_custom.GormModelCustom
+
+	Name string
 }

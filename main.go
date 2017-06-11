@@ -9,22 +9,16 @@ import (
 	"github.com/ylascombe/go-api/services"
 	"github.com/ylascombe/go-api/utils"
 	"github.com/ylascombe/go-api/config"
-	"database/sql"
-	"github.com/ylascombe/go-api/database"
 )
 
-var (
-	db *sql.DB
-)
 func main() {
 
-	database.SetupDB(db)
-	defer db.Close()
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", Index)
 	router.HandleFunc("/reactive-platform/target/{target}/manifestversion/{version}", api)
 	router.HandleFunc("/testCommands", launchCommand)
-	router.HandleFunc("/manifests", handleListManifests).Methods("GET")
+	router.HandleFunc("/v1/environment", envList)
+	//router.HandleFunc("/manifests", handleListManifests).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
@@ -44,7 +38,8 @@ func api(writer http.ResponseWriter, r *http.Request) {
 
 	ansibleCommands := services.BuildCommands(target, version, config.VAULT_SECRET_FILE)
 
-	go utils.ExecCommandListAsynchronously(ansibleCommands)
+	logger := utils.NewLog("/tmp/api.txt")
+	go utils.ExecCommandListAsynchronously(ansibleCommands, logger)
 	fmt.Fprintf(writer, "Les commandes ont été lancées")
 }
 
@@ -57,7 +52,8 @@ func isTerminated(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Statut des commandes, %q", html.EscapeString(r.URL.Path))
 }
 
-func handleListManifests(w http.ResponseWriter, r *http.Request) {
-
-	database.ListManifests
+func envList(writer http.ResponseWriter, r *http.Request) {
+	envs := services.ListEnvironment()
+	text := utils.Marshall(*envs)
+	fmt.Fprintf(writer, text)
 }

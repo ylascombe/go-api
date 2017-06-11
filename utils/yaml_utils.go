@@ -35,3 +35,23 @@ func UnmarshallFromFile(filePath string) (*models.Manifest, error) {
 
 	return config, nil
 }
+
+func Marshall(in interface{}) string {
+	d, err := yaml.Marshal(in)
+	result := string(d)
+	if err != nil {
+		err_msg := fmt.Sprintf("Error when marshalling object ", in, err)
+		fmt.Println(err_msg)
+		//return nil, errors.New(err_msg)
+	}
+	return string(result)
+}
+
+//func MarshallList(in []{}) string {
+//
+//	result := ""
+//	for i:=0;i<len(in); i++ {
+//		result += Marshall(in[i])
+//	}
+//	return result
+//}

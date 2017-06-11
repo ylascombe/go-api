@@ -30,3 +30,10 @@ func TestInsert(t *testing.T) {
 
 
 }
+
+func TestAutoMigrateDB(t *testing.T) {
+	db := NewDBDriver()
+	defer db.Close()
+
+	AutoMigrateDB(db)
+}
