@@ -7,5 +7,5 @@ import (
 type Environment struct {
 	gorm_custom.GormModelCustom
 
-	Name string
+	Name string `gorm:"not null;unique"`
 }

@@ -11,7 +11,7 @@ import "time"
 //      gorm.Model
 //    }
 type GormModelCustom struct {
-	ID        uint `gorm:"primary_key"`
+	ID        uint `gorm:"primary_key" yaml:"ID" json:"ID"`
 	CreatedAt *time.Time `json:"-" yaml:"-"`
 	UpdatedAt *time.Time `json:"-" yaml:"-"`
 	DeletedAt *time.Time `sql:"index" json:"-" yaml:"-"`

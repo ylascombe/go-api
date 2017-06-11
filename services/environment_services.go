@@ -15,14 +15,18 @@ func ListEnvironment() *[]models.Environment {
 	return &environments
 }
 
-func CreateEnvironment(name string) models.Environment {
+func CreateEnvironment(name string) (models.Environment, error) {
 	env := models.Environment{Name: name}
 
 	db := database.NewDBDriver()
 	defer db.Close()
 
-	db.Create(&env)
-	return env
+	err:= db.Create(&env).Error;
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+
+	return env, err
 }
 
 func GiveAccessTo(env models.Environment, user models.ApiUser) models.EnvironmentAccess {

@@ -15,7 +15,7 @@ func NewDBDriver() *gorm.DB {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	//defer db.Close()
+	//defer db.Close() DO NOT ADD close here, it has to be done in each calling function
 	return db
 }
 

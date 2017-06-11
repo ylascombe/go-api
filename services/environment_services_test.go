@@ -8,13 +8,17 @@ import (
 
 var (
 	envLOCAL models.Environment
-	envName = "LOCAL"
+	envName = "SPECIFIC"
+
+	// prerequisites
+	user, errPrereq = CreateApiUser("firstName", "lastname", "email@corp.com", "")
 )
 
 func TestCreateEnvironment(t *testing.T) {
-	result := CreateEnvironment(envName)
+	result, err := CreateEnvironment(envName)
 
 	assert.NotNil(t, result)
+	assert.Nil(t, err)
 
 	assert.Equal(t, envName, result.Name)
 	envLOCAL = result
@@ -22,9 +26,10 @@ func TestCreateEnvironment(t *testing.T) {
 
 func TestGiveAccessTo(t *testing.T) {
 
-	users := ListApiUser()
+	// check user has been well created
+	assert.Nil(t, errPrereq)
 
-	result := GiveAccessTo(envLOCAL, users[0])
+	result := GiveAccessTo(envLOCAL, user)
 
 	assert.NotNil(t, result)
 	assert.Equal(t, envName, result.Environment.Name)

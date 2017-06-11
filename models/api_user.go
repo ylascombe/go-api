@@ -9,6 +9,6 @@ type ApiUser struct {
 
 	Firstname string
 	Lastname string
-	Email string
+	Email string `gorm:"not null;unique"`
 	SshPublicKey string
 }
