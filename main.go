@@ -17,7 +17,9 @@ func main() {
 	router.HandleFunc("/", Index)
 	router.HandleFunc("/reactive-platform/target/{target}/manifestversion/{version}", api)
 	router.HandleFunc("/testCommands", launchCommand)
-	router.HandleFunc("/v1/environment", envList)
+
+	router.HandleFunc("/v1/environment", environment)
+	router.HandleFunc("/v1/environment/{name}", environment)
 	//router.HandleFunc("/manifests", handleListManifests).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
@@ -52,8 +54,26 @@ func isTerminated(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Statut des commandes, %q", html.EscapeString(r.URL.Path))
 }
 
+func environment(writer http.ResponseWriter, req *http.Request) {
+	fmt.Println(req.Method)
+	switch req.Method {
+	case "GET":
+		envList(writer, req)
+	case "POST":
+		createEnvironment(writer, req)
+	}
+}
+
 func envList(writer http.ResponseWriter, r *http.Request) {
 	envs := services.ListEnvironment()
 	text := utils.Marshall(*envs)
 	fmt.Fprintf(writer, text)
+}
+
+func createEnvironment(writer http.ResponseWriter, request *http.Request) {
+
+	vars := mux.Vars(request)
+	name := vars["name"]
+
+	services.CreateEnvironment(name)
 }
