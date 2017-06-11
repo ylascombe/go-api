@@ -46,12 +46,3 @@ func Marshall(in interface{}) string {
 	}
 	return string(result)
 }
-
-//func MarshallList(in []{}) string {
-//
-//	result := ""
-//	for i:=0;i<len(in); i++ {
-//		result += Marshall(in[i])
-//	}
-//	return result
-//}

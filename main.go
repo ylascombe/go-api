@@ -11,6 +11,12 @@ import (
 	"github.com/ylascombe/go-api/config"
 )
 
+type apiResponse struct {
+	ErrorMessage string      `yaml:"error,omitempty"`
+//	ID           string      `json:"id,omitempty"`
+//	Result       interface{} `json:"result,omitempty"`
+}
+
 func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
@@ -58,13 +64,13 @@ func environment(writer http.ResponseWriter, req *http.Request) {
 	fmt.Println(req.Method)
 	switch req.Method {
 	case "GET":
-		envList(writer, req)
+		listEnvironments(writer, req)
 	case "POST":
 		createEnvironment(writer, req)
 	}
 }
 
-func envList(writer http.ResponseWriter, r *http.Request) {
+func listEnvironments(writer http.ResponseWriter, r *http.Request) {
 	envs := services.ListEnvironment()
 	text := utils.Marshall(*envs)
 	fmt.Fprintf(writer, text)
@@ -75,5 +81,15 @@ func createEnvironment(writer http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	name := vars["name"]
 
-	services.CreateEnvironment(name)
+	_, err := services.CreateEnvironment(name)
+
+	if err == nil {
+		writer.WriteHeader(200)
+	} else {
+		writer.WriteHeader(409)
+		resp := apiResponse{ErrorMessage: string(err.Error())}
+		text := utils.Marshall(resp)
+		fmt.Fprintf(writer, text)
+
+	}
 }
