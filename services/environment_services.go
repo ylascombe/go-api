@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/ylascombe/go-api/database"
 	"github.com/ylascombe/go-api/models"
+	"fmt"
 )
 
 func ListEnvironment() (*[]models.Environment, error) {
@@ -44,3 +45,58 @@ func CreateEnvironmentAccess(envAccess models.EnvironmentAccess) (models.Environ
 	err := db.Create(&envAccess).Error;
 	return envAccess, err
 }
+
+func AddEnvironmentAccess(userID uint, envName string) error {
+	environment, err := GetEnvironmentFromName(envName)
+
+	// TODO remove println
+	fmt.Println("environment.ID", environment.ID)
+	fmt.Println("userID", userID)
+	if err == nil {
+		return err
+	}
+
+	fmt.Println(userID)
+
+	environmentAccess := models.EnvironmentAccess{EnvironmentID: environment.ID, ApiUserID: userID}
+	_, err = CreateEnvironmentAccess(environmentAccess)
+
+	if err == nil {
+		return err
+	}
+	return nil
+}
+
+func ListAccessForEnvironment(name string) (models.EnvironmentAccesses, error) {
+
+	db := database.NewDBDriver()
+	defer db.Close()
+
+	environment := models.Environment{Name: name}
+	err := db.First(&environment).Error
+
+	if err != nil {
+		return models.EnvironmentAccesses{}, err
+	}
+
+	var environmentAccess []models.EnvironmentAccess
+	err = db.Model(environment).Related(&environmentAccess).Error
+
+	if err != nil {
+		return models.EnvironmentAccesses{}, err
+	}
+
+	array := []models.EnvironmentAccess{}
+	return models.EnvironmentAccesses{List: array}, nil
+}
+
+func GetEnvironmentFromName(name string) (models.Environment, error) {
+	db := database.NewDBDriver()
+	defer db.Close()
+
+	environment := models.Environment{Name: name}
+	err := db.First(&environment).Error;
+
+	return environment, err
+}
+

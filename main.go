@@ -11,6 +11,7 @@ import (
 	"github.com/ylascombe/go-api/config"
 	"encoding/json"
 	"github.com/ylascombe/go-api/models"
+	"strconv"
 )
 
 type apiResponse struct {
@@ -29,7 +30,8 @@ func main() {
 	router.HandleFunc("/v1/environment", environment)
 	router.HandleFunc("/v1/environment/{name}", environment)
 	router.HandleFunc("/v1/user", user)
-	router.HandleFunc("/v1/environmentAccess", environmentAccess)
+	router.HandleFunc("/v1/environmentAccess/{name}", environmentAccess)
+	router.HandleFunc("/v1/environmentAccess/{name}/user/{userID}", environmentAccess)
 	//router.HandleFunc("/manifests", handleListManifests).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
@@ -64,13 +66,31 @@ func isTerminated(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Statut des commandes, %q", html.EscapeString(r.URL.Path))
 }
 
-func environment(writer http.ResponseWriter, req *http.Request) {
-	fmt.Println(req.Method)
+func environmentAccess(writer http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	name := vars["name"]
+
 	switch req.Method {
 	case "GET":
-		listEnvironments(writer, req)
-	case "POST":
-		createEnvironment(writer, req)
+		services.ListAccessForEnvironment(name)
+	case "PUT":
+		userID := vars["userID"]
+		intUserID, _ := strconv.Atoi(userID)
+		uintUserID := uint(intUserID)
+		fmt.Println("environmentAccess")
+
+		err := services.AddEnvironmentAccess(uintUserID, name)
+		fmt.Println("environmentAccess2")
+
+		if err == nil {
+			writer.WriteHeader(200)
+			return
+		} else {
+			writer.WriteHeader(409)
+			resp := apiResponse{ErrorMessage: string(err.Error())}
+			text := utils.Marshall(resp)
+			fmt.Fprintf(writer, text)
+		}
 	}
 }
 
@@ -169,7 +189,7 @@ func createUser(writer http.ResponseWriter, request *http.Request) {
 }
 
 
-func environmentAccess(writer http.ResponseWriter, req *http.Request) {
+func environment(writer http.ResponseWriter, req *http.Request) {
 	fmt.Println(req.Method)
 	switch req.Method {
 	case "GET":
