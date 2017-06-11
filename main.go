@@ -147,7 +147,6 @@ func listUsers(writer http.ResponseWriter, r *http.Request) {
 }
 
 func createUser(writer http.ResponseWriter, request *http.Request) {
-
 	var user models.ApiUser
 	utils.ReadObjectFromJSONInput(&user, writer, request)
 
@@ -202,6 +201,8 @@ func listEnvAccess(writer http.ResponseWriter, request *http.Request) {
 
 func createEnvAccess(writer http.ResponseWriter, request *http.Request) {
 	var envAccess models.EnvironmentAccess
+
+	//readObjectAndCallCreateFunction(envAccess, services.CreateEnvironmentAccess, writer, request)
 	utils.ReadObjectFromJSONInput(&envAccess, writer, request)
 
 	if envAccess.IsValid() {
@@ -220,4 +221,28 @@ func createEnvAccess(writer http.ResponseWriter, request *http.Request) {
 		text := utils.Marshall(resp)
 		fmt.Fprintf(writer, text)
 	}
+
 }
+
+// TODO comprendre pourquoi cette factorisation ne marche pas (c'est problème l'interface Validable)
+//func readObjectAndCallCreateFunction(toCreate models.Validable, fct func(models.Validable) (models.Validable, error), writer http.ResponseWriter, request *http.Request) {
+//
+//	utils.ReadObjectFromJSONInput(&toCreate, writer, request)
+//
+//	if toCreate.IsValid() {
+//		_, err := fct(toCreate)
+//		if err == nil {
+//			writer.WriteHeader(200)
+//		} else {
+//			writer.WriteHeader(409)
+//			resp := apiResponse{ErrorMessage: string(err.Error())}
+//			text := utils.Marshall(resp)
+//			fmt.Fprintf(writer, text)
+//		}
+//	} else {
+//		writer.WriteHeader(400)
+//		resp := apiResponse{ErrorMessage: "Given parameters are empty or not valid"}
+//		text := utils.Marshall(resp)
+//		fmt.Fprintf(writer, text)
+//	}
+//}
