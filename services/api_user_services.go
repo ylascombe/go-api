@@ -42,3 +42,15 @@ func CreateUser(user models.ApiUser) (models.ApiUser, error) {
 
 	return user, err
 }
+
+func ListEnvironmentAccesses() (models.EnvironmentAccesses, error) {
+	db := database.NewDBDriver()
+	defer db.Close()
+
+	var environmentAccesses []models.EnvironmentAccess
+	//result := db.Find(&user, "Firstname = ?", "Yohan") // find product with FirstName Yohan
+	err := db.Find(&environmentAccesses).Error;
+
+	envAccesses := models.EnvironmentAccesses{List: environmentAccesses}
+	return envAccesses, err
+}

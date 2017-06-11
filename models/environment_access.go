@@ -12,3 +12,7 @@ type EnvironmentAccess struct {
 	Environment Environment `gorm:"ForeignKey:EnvironmentID"`
 	EnvironmentID uint
 }
+
+func (envAccess EnvironmentAccess) IsValid() bool {
+	return envAccess.ApiUserID != 0 && envAccess.EnvironmentID != 0
+}

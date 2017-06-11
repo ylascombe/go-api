@@ -5,14 +5,14 @@ import (
 	"github.com/ylascombe/go-api/models"
 )
 
-func ListEnvironment() *[]models.Environment {
+func ListEnvironment() (*[]models.Environment, error) {
 	db := database.NewDBDriver()
 	defer db.Close()
 
 	var environments []models.Environment
-	db.Find(&environments)
+	err := db.Find(&environments).Error;
 
-	return &environments
+	return &environments, err
 }
 
 func CreateEnvironment(name string) (models.Environment, error) {
@@ -29,14 +29,18 @@ func CreateEnvironment(name string) (models.Environment, error) {
 	return env, err
 }
 
-func GiveAccessTo(env models.Environment, user models.ApiUser) models.EnvironmentAccess {
+func GiveAccessTo(env models.Environment, user models.ApiUser) (models.EnvironmentAccess, error) {
 
 	envAccess := models.EnvironmentAccess{ApiUser: user, Environment: env}
+
+	return CreateEnvironmentAccess(envAccess)
+}
+
+func CreateEnvironmentAccess(envAccess models.EnvironmentAccess) (models.EnvironmentAccess, error) {
 
 	db := database.NewDBDriver()
 	defer db.Close()
 
-	db.Create(&envAccess)
-	return envAccess
+	err := db.Create(&envAccess).Error;
+	return envAccess, err
 }
-
