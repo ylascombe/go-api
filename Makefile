@@ -3,7 +3,6 @@ BIN    = $(GOPATH)/bin
 GOLINT = $(BIN)/golint
 
 $(BIN)/golint: | $(BASE)
-	go get github.com/golang/lint/golint.
 
 dependencies:
 	go get github.com/lib/pq
@@ -12,3 +11,6 @@ dependencies:
 
 run:
 	go run main.go
+
+tests:
+	go test ./...
