@@ -17,7 +17,7 @@ func TestCreateApiUser(t *testing.T) {
 
 	users, err := ListApiUser()
 	assert.Nil(t, err)
-	assert.True(t, len(users) > 0)
+	assert.True(t, len(users.List) > 0)
 
 	// remove user in order to not change initial state
 	db := database.NewDBDriver()
@@ -33,5 +33,5 @@ func TestFindApiUsers(t *testing.T) {
 
 	result, err := ListApiUser()
 	assert.Nil(t, err)
-	assert.Equal(t, 0, len(result))
+	assert.Equal(t, 0, len(result.List))
 }
