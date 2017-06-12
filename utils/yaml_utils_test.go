@@ -3,6 +3,7 @@ package utils
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
+	"github.com/ylascombe/go-api/models"
 )
 
 const YAML = `format_version: 0.1
@@ -100,3 +101,36 @@ func TestUnmarshallFromFile(t *testing.T) {
 	assert.Equal(t, "absent", manifest.ReactPlatform.FeaturesStatus["spark2"])
 }
 
+func TestMarshall(t *testing.T) {
+
+	expectYaml := `version: "1.0"
+artifact_name: artifactTest
+extra_vars: {}
+`
+	api := models.Api{Version: "1.0", ArtifactName: "artifactTest"}
+
+	result := Marshall(api)
+	assert.NotNil(t, result)
+	assert.Equal(t, expectYaml, result)
+}
+
+func TestMarshallList(t *testing.T) {
+
+	expectYaml := `apis:
+- version: "1.0"
+  artifact_name: artifactTest1
+  extra_vars: {}
+- version: "2.0"
+  artifact_name: artifactTest2
+  extra_vars: {}
+`
+
+	api1 := models.Api{Version: "1.0", ArtifactName: "artifactTest1"}
+	api2 := models.Api{Version: "2.0", ArtifactName: "artifactTest2"}
+	apiArray := []models.Api {api1, api2}
+
+	apis := models.ApiList{List: apiArray}
+	result := Marshall(apis)
+	assert.NotNil(t, result)
+	assert.Equal(t, expectYaml, result)
+}
