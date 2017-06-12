@@ -5,54 +5,64 @@ import (
 	"github.com/ylascombe/go-api/models"
 )
 
-func ListApiUser() (models.ApiUsers, error) {
+func ListApiUser() (*models.ApiUsers, error) {
 	db := database.NewDBDriver()
 	defer db.Close()
 
 	var users []models.ApiUser
-	//result := db.Find(&user, "Firstname = ?", "Yohan") // find product with FirstName Yohan
 	err := db.Find(&users).Error
 
+	if err != nil {
+		return nil, err
+	}
+
 	apiUsers := models.ApiUsers{List: users}
-	return apiUsers, err
+	return &apiUsers, err
 }
 
-func CreateApiUser(firstName string, lastName string, email string, publicSSHKey string) (models.ApiUser, error) {
+func CreateApiUser(firstName string, lastName string, email string, publicSSHKey string) (*models.ApiUser, error) {
+
 	user := models.ApiUser{Lastname: lastName, Firstname: firstName, Email: email, SshPublicKey: publicSSHKey}
 
 	db := database.NewDBDriver()
 	defer db.Close()
 
 	err := db.Create(&user).Error
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
 
-	return user, err
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
-func CreateUser(user models.ApiUser) (models.ApiUser, error) {
+func CreateUser(user models.ApiUser) (*models.ApiUser, error) {
 	db := database.NewDBDriver()
 	defer db.Close()
 
 	err := db.Create(&user).Error
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
 
-	return user, err
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
-func ListEnvironmentAccesses() (models.EnvironmentAccesses, error) {
+func ListEnvironmentAccesses() (*models.EnvironmentAccesses, error) {
 	db := database.NewDBDriver()
 	defer db.Close()
 
 	var environmentAccesses []models.EnvironmentAccess
-	//result := db.Find(&user, "Firstname = ?", "Yohan") // find product with FirstName Yohan
 	err := db.Find(&environmentAccesses).Error
 
+	// TODO add test to test empty
+	if err != nil {
+		return nil, err
+	}
+
 	envAccesses := models.EnvironmentAccesses{List: environmentAccesses}
-	return envAccesses, err
+	return &envAccesses, nil
 }
 
 func GetApiUser(userID uint) (*models.ApiUser, error) {
@@ -69,12 +79,16 @@ func GetApiUser(userID uint) (*models.ApiUser, error) {
 	return &user, nil
 }
 
-func GetApiUserFromMail(email string) (models.ApiUser, error) {
+func GetApiUserFromMail(email string) (*models.ApiUser, error) {
 	db := database.NewDBDriver()
 	defer db.Close()
 
 	var user models.ApiUser
 	err := db.First(&user, "Email = ?", email).Error
 
-	return user, err
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

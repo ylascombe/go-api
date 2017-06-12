@@ -9,7 +9,7 @@ import (
 )
 
 type testData struct {
-	User models.ApiUser
+	User *models.ApiUser
 }
 
 var (
@@ -55,7 +55,7 @@ func TestGiveAccessToInvalidEnvironment(t *testing.T) {
 	db.Model(&models.EnvironmentAccess{}).Count(&countBefore)
 
 	// act
-	result, err := GiveAccessTo(models.Environment{}, testData.User)
+	result, err := GiveAccessTo(models.Environment{}, *testData.User)
 
 	// assert
 	assert.Nil(t, result)
@@ -81,7 +81,7 @@ func TestGiveAccessTo(t *testing.T) {
 	db.Model(&models.EnvironmentAccess{}).Count(&countBefore)
 
 	// act
-	result, err := GiveAccessTo(env, testData.User)
+	result, err := GiveAccessTo(env, *testData.User)
 
 	// assert
 	assert.NotNil(t, result)
