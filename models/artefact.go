@@ -5,7 +5,6 @@ import "github.com/jinzhu/gorm"
 type Artefact struct {
 	gorm.Model
 
-	Name string
+	Name     string
 	NexusUrl string
-
 }

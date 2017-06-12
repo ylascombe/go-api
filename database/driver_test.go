@@ -1,9 +1,9 @@
 package database
 
 import (
-	"testing"
-	"github.com/ylascombe/go-api/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/ylascombe/go-api/models"
+	"testing"
 )
 
 var (
@@ -33,7 +33,6 @@ func TestInsert(t *testing.T) {
 	// Delete - delete product
 	db.Delete(&user)
 
-
 }
 
 func TestAutoMigrateDB(t *testing.T) {
@@ -49,6 +48,6 @@ func TestTearDown(t *testing.T) {
 	db := NewDBDriver()
 	defer db.Close()
 	//db.Delete(user)
-	res := db.Exec("delete from api_users where email = ?", email).Error;
+	res := db.Exec("delete from api_users where email = ?", email).Error
 	assert.Nil(t, res)
 }

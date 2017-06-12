@@ -1,15 +1,15 @@
 package utils
 
 import (
-	"io/ioutil"
-	"io"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 )
 
 // TODO add test for this function
-func ReadObjectFromJSONInput (toUnmarshallObj interface{}, writer http.ResponseWriter, request *http.Request) {
+func ReadObjectFromJSONInput(toUnmarshallObj interface{}, writer http.ResponseWriter, request *http.Request) {
 	body, err := ioutil.ReadAll(io.LimitReader(request.Body, 1048576))
 	if err != nil {
 		panic(err)

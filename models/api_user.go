@@ -7,9 +7,9 @@ import (
 type ApiUser struct {
 	gorm_custom.GormModelCustom
 
-	Firstname string `json:"firstname" yaml:"firstname"`
-	Lastname string `json:"lastname" yaml:"lastname"`
-	Email string `gorm:"not null;unique" json:"email" yaml:"email"`
+	Firstname    string `json:"firstname" yaml:"firstname"`
+	Lastname     string `json:"lastname" yaml:"lastname"`
+	Email        string `gorm:"not null;unique" json:"email" yaml:"email"`
 	SshPublicKey string `json:"ssh_public_key" yaml:"ssh_public_key"`
 }
 

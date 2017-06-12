@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/ylascombe/go-api/models"
+	"testing"
 )
 
 const YAML = `format_version: 0.1
@@ -127,7 +127,7 @@ func TestMarshallList(t *testing.T) {
 
 	api1 := models.Api{Version: "1.0", ArtifactName: "artifactTest1"}
 	api2 := models.Api{Version: "2.0", ArtifactName: "artifactTest2"}
-	apiArray := []models.Api {api1, api2}
+	apiArray := []models.Api{api1, api2}
 
 	apis := models.ApiList{List: apiArray}
 	result := Marshall(apis)

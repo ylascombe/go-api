@@ -1,10 +1,9 @@
 package services
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
-
 
 func TestBuildCommand(t *testing.T) {
 	commands := BuildCommands("LOCAL.ini", "", "fake_path")

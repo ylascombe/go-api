@@ -1,6 +1,6 @@
 package models
 
 type CommonConfig struct {
-	Id int `gorm:"AUTO_INCREMENT"`
+	Id   int `gorm:"AUTO_INCREMENT"`
 	Json string
 }

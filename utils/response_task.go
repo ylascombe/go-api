@@ -1,19 +1,19 @@
 package utils
 
 import (
-	"os/exec"
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
+	"os/exec"
 )
 
 type ResponseTask struct {
-	Command *exec.Cmd
-	ProcessId int `yaml:"process_id"`
+	Command     *exec.Cmd
+	ProcessId   int    `yaml:"process_id"`
 	TaskCommand string `json:"task_command"`
-	Logger *Logger
+	Logger      *Logger
 }
 
-func IsTerminated(responseTask ResponseTask ) bool {
+func IsTerminated(responseTask ResponseTask) bool {
 	// TODO add test since it does not work
 	return responseTask.Command.ProcessState != nil
 }

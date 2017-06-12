@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
+	"testing"
 )
 
 func TestCreateLogger(t *testing.T) {

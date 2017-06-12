@@ -2,11 +2,11 @@ package utils
 
 import (
 	"errors"
-	"io/ioutil"
-	"log"
+	"fmt"
 	"github.com/ylascombe/go-api/models"
 	"gopkg.in/yaml.v2"
-	"fmt"
+	"io/ioutil"
+	"log"
 )
 
 func unmarshall(yamlText []byte) (*models.Manifest, error) {

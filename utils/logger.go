@@ -1,19 +1,19 @@
 package utils
 
 import (
-	"log"
-	"os"
 	"fmt"
 	"github.com/ylascombe/go-api/config"
+	"log"
+	"os"
 	"os/exec"
 )
 
 type Logger struct {
-	log *log.Logger
+	log      *log.Logger
 	filepath string
 }
 
-func NewLog(logpath string) Logger{
+func NewLog(logpath string) Logger {
 	file, err := os.Create(logpath)
 	if err != nil {
 		panic(err)
@@ -35,7 +35,7 @@ func (logger Logger) Println(log string, cmd exec.Cmd) {
 	}
 }
 
-func (logger Logger) Error(log string, cmd exec.Cmd,err error) {
+func (logger Logger) Error(log string, cmd exec.Cmd, err error) {
 	logger.log.Println(log)
 }
 

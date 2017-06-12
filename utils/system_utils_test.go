@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
 	"os/exec"
+	"testing"
 )
 
 func TestExecCommandAsynchronously(t *testing.T) {
@@ -15,7 +15,7 @@ func TestExecCommandAsynchronously(t *testing.T) {
 	assert.True(t, status.ProcessId > 0)
 	assert.Equal(t, nil, err)
 
-	assert.Contains(t, status.StdoutSnapshot() ,"tutu")
+	assert.Contains(t, status.StdoutSnapshot(), "tutu")
 }
 
 func TestExecCommandListAsynchronously(t *testing.T) {
@@ -31,15 +31,15 @@ func TestExecCommandListAsynchronously(t *testing.T) {
 	}
 	status, err := ExecCommandListAsynchronously(commands, logger)
 
-	assert.Equal(t, 6 , len(status))
+	assert.Equal(t, 6, len(status))
 	assert.Equal(t, nil, err)
 
-	for i:=0; i<len(status); i++ {
+	for i := 0; i < len(status); i++ {
 		assert.False(t, IsTerminated(status[i]))
 	}
 
 	WaitForCompletion(status, logger)
-	for i:=0; i<len(status); i++ {
+	for i := 0; i < len(status); i++ {
 		assert.True(t, IsTerminated(status[i]))
 	}
 	stdout := status[0].StdoutSnapshot
@@ -57,7 +57,7 @@ func TestExecCommandListAsynchronouslyWhenError(t *testing.T) {
 	}
 	status, _ := ExecCommandListAsynchronously(commands, logger)
 
-	assert.Equal(t, 3 , len(status))
+	assert.Equal(t, 3, len(status))
 
 	errors := WaitForCompletion(status, logger)
 	assert.NotNil(t, errors)

@@ -4,6 +4,6 @@ import "github.com/jinzhu/gorm"
 
 type AppModule struct {
 	gorm.Model
-	Artefact Artefact
+	Artefact     Artefact
 	CommonConfig CommonConfig
 }

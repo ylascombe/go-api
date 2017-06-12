@@ -1,23 +1,23 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
+	"github.com/ylascombe/go-api/config"
+	"github.com/ylascombe/go-api/models"
+	"github.com/ylascombe/go-api/services"
+	"github.com/ylascombe/go-api/utils"
 	"html"
 	"log"
 	"net/http"
-	"github.com/gorilla/mux"
-	"github.com/ylascombe/go-api/services"
-	"github.com/ylascombe/go-api/utils"
-	"github.com/ylascombe/go-api/config"
-	"encoding/json"
-	"github.com/ylascombe/go-api/models"
 	"strconv"
 )
 
 type apiResponse struct {
-	ErrorMessage string      `yaml:"error,omitempty"`
-//	ID           string      `json:"id,omitempty"`
-//	Result       interface{} `json:"result,omitempty"`
+	ErrorMessage string `yaml:"error,omitempty"`
+	//	ID           string      `json:"id,omitempty"`
+	//	Result       interface{} `json:"result,omitempty"`
 }
 
 func main() {
@@ -83,14 +83,19 @@ func environmentAccess(writer http.ResponseWriter, req *http.Request) {
 		fmt.Println("environmentAccess2")
 
 		if err == nil {
+			fmt.Println("environmentAccess - 200")
 			writer.WriteHeader(200)
 			return
 		} else {
+			fmt.Println("environmentAccess - 409")
 			writer.WriteHeader(409)
 			resp := apiResponse{ErrorMessage: string(err.Error())}
 			text := utils.Marshall(resp)
 			fmt.Fprintf(writer, text)
 		}
+	default:
+		fmt.Println("environmentAccess - 404")
+		writer.WriteHeader(404)
 	}
 }
 
@@ -188,16 +193,16 @@ func createUser(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-
 func environment(writer http.ResponseWriter, req *http.Request) {
 	fmt.Println(req.Method)
 	switch req.Method {
 	case "GET":
-		listEnvAccess(writer, req)
+		listEnvironments(writer, req)
 	case "POST":
-		createEnvAccess(writer, req)
+		createEnvironment(writer, req)
 	}
 }
+
 func listEnvAccess(writer http.ResponseWriter, request *http.Request) {
 	environmentAccesses, err := services.ListEnvironmentAccesses()
 
@@ -226,7 +231,7 @@ func createEnvAccess(writer http.ResponseWriter, request *http.Request) {
 	utils.ReadObjectFromJSONInput(&envAccess, writer, request)
 
 	if envAccess.IsValid() {
-		_, err := services.CreateEnvironmentAccess(envAccess)
+		_, err := services.CreateEnvironmentAccess(&envAccess)
 		if err == nil {
 			writer.WriteHeader(200)
 		} else {
