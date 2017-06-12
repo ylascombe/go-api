@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	emailJohnDoe = "john@doe.org"
-	firstname = "john"
-	lastname = "doe"
+	email = "john@doe.org"
+	firstName = "john"
+	lastName = "doe"
 	sshPubKey = "ssh-rsa XYZ"
 )
 
@@ -26,7 +26,7 @@ func TestCreateApiUser(t *testing.T) {
 	db.Model(&models.ApiUser{}).Count(&countBefore)
 
 	// act
-	user, err := CreateApiUser(firstname, lastname, emailJohnDoe, sshPubKey)
+	user, err := CreateApiUser(firstName, lastName, email, sshPubKey)
 
 	// assert
 	db.Model(&models.ApiUser{}).Count(&countAfter)
@@ -34,9 +34,9 @@ func TestCreateApiUser(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, user)
 	assert.Equal(t, countBefore+1, countAfter)
-	assert.Equal(t, emailJohnDoe, user.Email)
-	assert.Equal(t, firstname, user.Firstname)
-	assert.Equal(t, lastname, user.Lastname)
+	assert.Equal(t, email, user.Email)
+	assert.Equal(t, firstName, user.Firstname)
+	assert.Equal(t, lastName, user.Lastname)
 	assert.Equal(t, sshPubKey, user.SshPublicKey)
 
 	tearDownApiUser(t)
@@ -55,7 +55,7 @@ func TestListApiUserWhenNoUser(t *testing.T) {
 func TestListApiUserWhenOneUser(t *testing.T) {
 
 	// arrange
-	CreateApiUser(firstname, lastname, emailJohnDoe, sshPubKey)
+	CreateApiUser(firstName, lastName, email, sshPubKey)
 
 	// act
 	users, err := ListApiUser()
@@ -64,7 +64,7 @@ func TestListApiUserWhenOneUser(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(users.List))
 
-	assert.Equal(t, emailJohnDoe, users.List[0].Email)
+	assert.Equal(t, email, users.List[0].Email)
 
 	// clean
 	tearDownApiUser(t)

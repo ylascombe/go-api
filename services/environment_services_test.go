@@ -14,7 +14,6 @@ type testData struct {
 
 var (
 	envName = "SPECIFIC"
-	email   = "email@corp.com"
 )
 
 func TestCreateEnvironment(t *testing.T) {
@@ -199,6 +198,23 @@ func TestListEnvironmentAccess(t *testing.T) {
 	assert.Equal(t, 0, len(results.List))
 }
 
+func TestGetEnvironment(t *testing.T) {
+
+	// arrange
+	setUp(t)
+	tmpEnv, _ := CreateEnvironment(envName)
+
+	// act
+	res, err := GetEnvironment(tmpEnv.ID)
+
+	// assert
+	assert.Nil(t, err)
+	assert.NotNil(t, res)
+	assert.Equal(t, envName, res.Name)
+
+	tearDown(t)
+}
+
 func TestGetEnvironmentByName(t *testing.T) {
 	// arrange
 	setUp(t)
@@ -260,6 +276,14 @@ func TestListAccessForEnvironmentWhenOne(t *testing.T) {
 	assert.NotNil(t, res)
 	assert.Equal(t, 1, len(res.List))
 
+	assert.NotNil(t, envName, res.List[0].Environment)
+	assert.Equal(t, envName, res.List[0].Environment.Name)
+	assert.NotNil(t, res.List[0].EnvironmentID)
+	assert.NotNil(t, res.List[0].ApiUser)
+	assert.Equal(t, email, res.List[0].ApiUser.Email)
+	assert.Equal(t, firstName, res.List[0].ApiUser.Firstname)
+	assert.Equal(t, lastName, res.List[0].ApiUser.Lastname)
+	assert.Equal(t, sshPubKey, res.List[0].ApiUser.SshPublicKey)
 	tearDown(t)
 }
 
@@ -287,7 +311,7 @@ func setUp(t *testing.T) testData {
 
 	if err != nil {
 		// prerequisites
-		user, err = CreateApiUser("firstName", "lastname", email, "")
+		user, err = CreateApiUser(firstName, lastName, email, sshPubKey)
 		if err != nil {
 			panic("db error")
 		}

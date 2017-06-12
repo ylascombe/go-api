@@ -2,9 +2,9 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"github.com/ylascombe/go-api/database"
 	"github.com/ylascombe/go-api/models"
+	"fmt"
 )
 
 func ListEnvironment() (*[]models.Environment, error) {
@@ -77,7 +77,7 @@ func AddEnvironmentAccess(userID uint, envName string) error {
 	return nil
 }
 
-func ListAccessForEnvironment(envName string) (models.EnvironmentAccesses, error) {
+func ListAccessForEnvironment(envName string) (*models.EnvironmentAccesses, error) {
 
 	array := []models.EnvironmentAccess{}
 	envAccesses := models.EnvironmentAccesses{List: array}
@@ -88,16 +88,55 @@ func ListAccessForEnvironment(envName string) (models.EnvironmentAccesses, error
 	environment, err := GetEnvironmentByName(envName)
 
 	if err != nil {
-		return envAccesses, err
+		return nil, err
 	}
 
 	err = db.Model(environment).Related(&envAccesses.List).Error
 
 	if err != nil {
-		return envAccesses, err
+		return nil, err
 	}
 
-	return envAccesses, nil
+	// load "manually" each item in list
+	// TODO manage better error
+	for i := 0; i< len(envAccesses.List); i++ {
+
+		var apiUser models.ApiUser
+
+		err = db.First(&apiUser, envAccesses.List[i].ApiUserID).Error
+
+		if err != nil {
+			return nil, err
+		}
+
+		envAccesses.List[i].ApiUser = apiUser
+
+		var env models.Environment
+		err = db.First(&env, envAccesses.List[i].EnvironmentID).Error
+
+		if err != nil {
+			return nil, err
+		}
+		envAccesses.List[i].Environment = env
+	}
+
+	return &envAccesses, nil
+}
+
+func ListEnvironmentAccesses() (*models.EnvironmentAccesses, error) {
+	db := database.NewDBDriver()
+	defer db.Close()
+
+	var environmentAccesses []models.EnvironmentAccess
+	err := db.Find(&environmentAccesses).Error
+
+	// TODO add test to test empty
+	if err != nil {
+		return nil, err
+	}
+
+	envAccesses := models.EnvironmentAccesses{List: environmentAccesses}
+	return &envAccesses, nil
 }
 
 func GetEnvironmentByName(name string) (*models.Environment, error) {
@@ -106,6 +145,20 @@ func GetEnvironmentByName(name string) (*models.Environment, error) {
 
 	environment := models.Environment{Name: name}
 	err := db.First(&environment).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &environment, nil
+}
+
+func GetEnvironment(id uint) (*models.Environment, error) {
+	db := database.NewDBDriver()
+	defer db.Close()
+
+	environment := models.Environment{}
+	err := db.First(&environment, id).Error
 
 	if err != nil {
 		return nil, err

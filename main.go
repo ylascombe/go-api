@@ -16,8 +16,6 @@ import (
 
 type apiResponse struct {
 	ErrorMessage string `yaml:"error,omitempty"`
-	//	ID           string      `json:"id,omitempty"`
-	//	Result       interface{} `json:"result,omitempty"`
 }
 
 func main() {
@@ -25,14 +23,21 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", Index)
 	router.HandleFunc("/reactive-platform/target/{target}/manifestversion/{version}", api)
-	router.HandleFunc("/testCommands", launchCommand)
 
 	router.HandleFunc("/v1/environment", environment)
 	router.HandleFunc("/v1/environment/{name}", environment)
+
 	router.HandleFunc("/v1/user", user)
+
 	router.HandleFunc("/v1/environmentAccess/{name}", environmentAccess)
 	router.HandleFunc("/v1/environmentAccess/{name}/user/{userID}", environmentAccess)
+
 	//router.HandleFunc("/manifests", handleListManifests).Methods("GET")
+
+	// TODO remove me when tests done
+	router.HandleFunc("/testCommands", launchCommand)
+
+	// XXX keep it at the end of this function
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
@@ -62,63 +67,31 @@ func launchCommand(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Les commandes ont été lancées, %q", html.EscapeString(r.URL.Path))
 }
 
-func isTerminated(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Statut des commandes, %q", html.EscapeString(r.URL.Path))
-}
-
-func environmentAccess(writer http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
-	name := vars["name"]
-
-	switch req.Method {
-	case "GET":
-		services.ListAccessForEnvironment(name)
-	case "PUT":
-		userID := vars["userID"]
-		intUserID, _ := strconv.Atoi(userID)
-		uintUserID := uint(intUserID)
-		fmt.Println("environmentAccess")
-
-		err := services.AddEnvironmentAccess(uintUserID, name)
-		fmt.Println("environmentAccess2")
-
-		if err == nil {
-			fmt.Println("environmentAccess - 200")
-			writer.WriteHeader(200)
-			return
-		} else {
-			fmt.Println("environmentAccess - 409")
-			writer.WriteHeader(409)
-			resp := apiResponse{ErrorMessage: string(err.Error())}
-			text := utils.Marshall(resp)
-			fmt.Fprintf(writer, text)
-		}
-	default:
-		fmt.Println("environmentAccess - 404")
-		writer.WriteHeader(404)
-	}
-}
-
 func listEnvironments(writer http.ResponseWriter, r *http.Request) {
 	envs, err := services.ListEnvironment()
-	text := utils.Marshall(*envs)
-	fmt.Fprintf(writer, text)
 
 	if err == nil {
-		// YAML Marshalling : text := utils.Marshall(envs)
-		text, err := json.Marshal(envs)
+		bytes, err := json.Marshal(*envs)
 
 		if err == nil {
-			writer.WriteHeader(200)
-			fmt.Fprintf(writer, string(text))
-			return
+			fmt.Fprintf(writer, string(bytes))
+
+			if err == nil {
+				// YAML Marshalling : text := utils.Marshall(envs)
+				text := utils.Marshall(envs)
+
+				writer.WriteHeader(200)
+				fmt.Fprintf(writer, string(text))
+				return
+			}
 		}
 	}
+
 
 	// if this code is executed, so there is an error
 	writer.WriteHeader(500)
 	resp := apiResponse{ErrorMessage: string(err.Error())}
-	text = utils.Marshall(resp)
+	text := utils.Marshall(resp)
 	fmt.Fprintf(writer, text)
 }
 
@@ -203,9 +176,47 @@ func environment(writer http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func listEnvAccess(writer http.ResponseWriter, request *http.Request) {
-	environmentAccesses, err := services.ListEnvironmentAccesses()
+func environmentAccess(writer http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	name := vars["name"]
 
+	fmt.Println("Method : ", req.Method)
+	switch req.Method {
+	case "GET":
+		listEnvironmentAccesses(writer, req, name)
+
+	case "PUT":
+		userID := vars["userID"]
+		intUserID, _ := strconv.Atoi(userID)
+		uintUserID := uint(intUserID)
+		fmt.Println("environmentAccess2")
+
+		err := services.AddEnvironmentAccess(uintUserID, name)
+		fmt.Println("environmentAccess3")
+		fmt.Println(err)
+
+		if err == nil {
+			fmt.Println("environmentAccess - 200")
+			writer.WriteHeader(200)
+			return
+		} else {
+			fmt.Println("environmentAccess - 409")
+			writer.WriteHeader(409)
+			resp := apiResponse{ErrorMessage: string(err.Error())}
+			text := utils.Marshall(resp)
+			fmt.Fprintf(writer, text)
+		}
+	default:
+		fmt.Println("environmentAccess - 404")
+		writer.WriteHeader(404)
+	}
+}
+
+func listEnvironmentAccesses(writer http.ResponseWriter, request *http.Request, name string) {
+	environmentAccesses, err := services.ListAccessForEnvironment(name)
+
+	fmt.Println("name", name)
+	fmt.Println(environmentAccesses)
 	if err == nil {
 		// for YAML Marshalling : text := utils.Marshall(users)
 		text, err := json.Marshal(environmentAccesses)
@@ -224,7 +235,7 @@ func listEnvAccess(writer http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(writer, text)
 }
 
-func createEnvAccess(writer http.ResponseWriter, request *http.Request) {
+func createEnvironmentAccess(writer http.ResponseWriter, request *http.Request) {
 	var envAccess models.EnvironmentAccess
 
 	//readObjectAndCallCreateFunction(envAccess, services.CreateEnvironmentAccess, writer, request)

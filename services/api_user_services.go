@@ -49,22 +49,6 @@ func CreateUser(user models.ApiUser) (*models.ApiUser, error) {
 	return &user, nil
 }
 
-func ListEnvironmentAccesses() (*models.EnvironmentAccesses, error) {
-	db := database.NewDBDriver()
-	defer db.Close()
-
-	var environmentAccesses []models.EnvironmentAccess
-	err := db.Find(&environmentAccesses).Error
-
-	// TODO add test to test empty
-	if err != nil {
-		return nil, err
-	}
-
-	envAccesses := models.EnvironmentAccesses{List: environmentAccesses}
-	return &envAccesses, nil
-}
-
 func GetApiUser(userID uint) (*models.ApiUser, error) {
 	db := database.NewDBDriver()
 	defer db.Close()

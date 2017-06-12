@@ -1,6 +1,6 @@
 #!/bin/bash
 
-curl http://localhost:8080/v1/environment
+curl http://localhost:8080/v1/environment | jq
 curl http://localhost:8080/v1/environment/LOCAL -X POST
 
 curl http://localhost:8080/v1/user | jq
