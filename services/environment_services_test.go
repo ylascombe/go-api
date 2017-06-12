@@ -1,65 +1,195 @@
 package services
 
 import (
-	"testing"
-	"github.com/ylascombe/go-api/models"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/ylascombe/go-api/database"
+	"github.com/ylascombe/go-api/models"
+	"testing"
 )
 
-var (
-	envLOCAL models.Environment
-	envName = "SPECIFIC"
+type testData struct {
+	User models.ApiUser
+}
 
-	// prerequisites
-	user, errPrereq = CreateApiUser("firstName", "lastname", "email@corp.com", "")
+var (
+	envName = "SPECIFIC"
+	email   = "email@corp.com"
 )
 
 func TestCreateEnvironment(t *testing.T) {
+
+	// Arrange
+	setUp(t)
+	db := database.NewDBDriver()
+	defer db.Close()
+
+	var countAfter int
+	var countBefore int
+	db.Model(&models.Environment{}).Count(&countBefore)
+
+	// Act
 	result, err := CreateEnvironment(envName)
 
+	// Assert
+	db.Model(&models.Environment{}).Count(&countAfter)
 	assert.NotNil(t, result)
 	assert.Nil(t, err)
 
 	assert.Equal(t, envName, result.Name)
-	envLOCAL = result
+	assert.True(t, countAfter == countBefore+1)
 
-	// remove access in order to not change initial state
+	tearDown(t)
+}
+
+func TestGiveAccessToInvalidEnvironment(t *testing.T) {
+
+	// arrange
+	testData := setUp(t)
 	db := database.NewDBDriver()
 	defer db.Close()
-	//db.Delete(user)
-	res := db.Exec("delete from environments where name = ?", envName).Error;
-	assert.Nil(t, res)
+
+	var countAfter int
+	var countBefore int
+
+	db.Model(&models.EnvironmentAccess{}).Count(&countBefore)
+
+	// act
+	result, err := GiveAccessTo(models.Environment{}, testData.User)
+
+	// assert
+	assert.Nil(t, result)
+	assert.NotNil(t, err)
+
+	db.Model(&models.EnvironmentAccess{}).Count(&countAfter)
+	assert.True(t, countAfter == countBefore)
+
+	tearDown(t)
 }
 
 func TestGiveAccessTo(t *testing.T) {
 
-	// check user has been well created
-	assert.Nil(t, errPrereq)
-
-	result, err := GiveAccessTo(envLOCAL, user)
-
-	assert.Nil(t, err)
-	assert.NotNil(t, result)
-	//assert.Equal(t, envName, result.Environment.Name)
-
-	// remove access in order to not change initial state
+	// arrange
+	testData := setUp(t)
 	db := database.NewDBDriver()
 	defer db.Close()
-	//db.Delete(user)
-	res := db.Exec("delete from environment_accesses where api_user_id = ? and environment_id = ?", user.ID, envLOCAL.ID).Error;
-	assert.Nil(t, res)
+
+	var countAfter int
+	var countBefore int
+
+	env, _ := CreateEnvironment(envName)
+	db.Model(&models.EnvironmentAccess{}).Count(&countBefore)
+
+	// act
+	result, err := GiveAccessTo(env, testData.User)
+
+	// assert
+	assert.NotNil(t, result)
+	assert.Nil(t, err)
+
+	db.Model(&models.EnvironmentAccess{}).Count(&countAfter)
+	assert.Equal(t, countBefore+1, countAfter)
+
+	tearDown(t)
 }
 
 
-func TestListEnvironment(t *testing.T) {
+func TestListEnvironmentWhenEmpty(t *testing.T) {
+	// arrange
+
+	// act
 	results, err := ListEnvironment()
 
+	// assert
+	assert.Nil(t, err)
+	assert.NotNil(t, results)
+	assert.Equal(t, 0, len(*results))
+}
+
+func TestListEnvironmentWhenOne(t *testing.T) {
+	// arrange
+	setUp(t)
+	CreateEnvironment("TEST")
+
+	// act
+	results, err := ListEnvironment()
+
+	// assert
 	assert.Nil(t, err)
 	assert.NotNil(t, results)
 	assert.Equal(t, 1, len(*results))
+
+	tearDown(t)
 }
 
+func TestAddEnvironmentAccessWhenEnvironmentIsAbsent(t *testing.T) {
+
+	// arrange
+	var countBefore int
+	var countAfter int
+
+	testData := setUp(t)
+	db := database.NewDBDriver()
+	defer db.Close()
+	db.Model(models.EnvironmentAccess{}).Count(&countBefore)
+
+	// act
+	err := AddEnvironmentAccess(testData.User.ID, envName)
+
+	// assert
+	assert.NotNil(t, err)
+	db.Model(models.EnvironmentAccess{}).Count(&countAfter)
+	assert.Equal(t, countBefore, countAfter)
+
+	tearDown(t)
+}
+
+func TestAddEnvironmentAccessWhenUserIsAbsent(t *testing.T) {
+
+	// arrange
+	var countBefore int
+	var countAfter int
+
+	testData := setUp(t)
+	db := database.NewDBDriver()
+	defer db.Close()
+
+	CreateEnvironment(envName)
+
+	// act
+	err := AddEnvironmentAccess(testData.User.ID + 42, envName)
+
+	// assert
+	assert.NotNil(t, err)
+	db.Model(models.EnvironmentAccess{}).Count(&countAfter)
+	assert.Equal(t, countBefore, countAfter)
+
+	tearDown(t)
+}
+
+func TestAddEnvironmentAccess(t *testing.T) {
+
+	// arrange
+	var countBefore int
+	var countAfter int
+
+	testData := setUp(t)
+	db := database.NewDBDriver()
+	defer db.Close()
+	db.Model(models.EnvironmentAccess{}).Count(&countBefore)
+
+	CreateEnvironment(envName)
+
+	// act
+	err := AddEnvironmentAccess(testData.User.ID, envName)
+
+	// assert
+	assert.Nil(t, err)
+	db.Model(models.EnvironmentAccess{}).Count(&countAfter)
+	assert.Equal(t, countBefore+1, countAfter)
+
+	tearDown(t)
+}
 
 func TestListEnvironmentAccess(t *testing.T) {
 	results, err := ListEnvironmentAccesses()
@@ -69,44 +199,102 @@ func TestListEnvironmentAccess(t *testing.T) {
 	assert.Equal(t, 0, len(results.List))
 }
 
-func TestListAccessForEnvironment(t *testing.T) {
+func TestGetEnvironmentByName(t *testing.T) {
+	// arrange
+	setUp(t)
+	CreateEnvironment(envName)
 
-	res, err := ListAccessForEnvironment(envName)
+	// act
+	res, err := GetEnvironmentByName(envName)
 
-	assert.Nil(t, err)
-	assert.NotNil(t, res)
-	assert.Equal(t, 0, len(res.List))
-}
-
-func TestGetEnvironmentFromName(t *testing.T) {
-	res, err := GetEnvironmentFromName(envName)
-
+	// assert
 	assert.Nil(t, err)
 	assert.NotNil(t, res)
 	assert.Equal(t, envName, res.Name)
 
+	tearDown(t)
 
 }
 
-func TestAddEnvironmentAccess(t *testing.T) {
+func TestGetEnvironmentByNameWhenEnvironmentIsAbsent(t *testing.T) {
+	// arrange
+	setUp(t)
 
-	err := AddEnvironmentAccess(user.ID, envName)
+	// act
+	res, err := GetEnvironmentByName(envName)
 
-	assert.Nil(t, err)
+	// assert
+	assert.NotNil(t, err)
+	assert.Nil(t, res)
 
+	tearDown(t)
+}
+
+func TestListAccessForEnvironmentWhenEmpty(t *testing.T) {
+	// arrange
+	setUp(t)
+	CreateEnvironment(envName)
+
+	// act
 	res, err := ListAccessForEnvironment(envName)
 
+	// assert
+	assert.Nil(t, err)
+	assert.NotNil(t, res)
+	assert.Equal(t, 0, len(res.List))
+
+	tearDown(t)
+}
+
+func TestListAccessForEnvironmentWhenOne(t *testing.T) {
+	// arrange
+	testData := setUp(t)
+	CreateEnvironment(envName)
+	err := AddEnvironmentAccess(testData.User.ID, envName)
+
+	// act
+	res, err := ListAccessForEnvironment(envName)
+
+	// assert
 	assert.Nil(t, err)
 	assert.NotNil(t, res)
 	assert.Equal(t, 1, len(res.List))
+
+	tearDown(t)
 }
 
 // Force to remove test user
-func TestTearDown(t *testing.T) {
+func tearDown(t *testing.T) {
+
 	// remove user in order to not change initial state
 	db := database.NewDBDriver()
 	defer db.Close()
 	//db.Delete(user)
-	res := db.Exec("delete from api_users where email = ?", user.Email).Error;
-	assert.Nil(t, res)
+	res1 := db.Exec("delete from api_users").Error
+	res2 := db.Exec("delete from environment_accesses").Error
+	res3 := db.Exec("delete from environments").Error
+
+	if res1 != nil || res2 != nil || res3 != nil {
+		panic(fmt.Sprintf(
+			"db error: api_users=%s environment_accesses=%s, environments=%s",
+			res1, res2, res3))
+	}
+}
+
+func setUp(t *testing.T) testData {
+
+	user, err := GetApiUserFromMail(email)
+
+	if err != nil {
+		// prerequisites
+		user, err = CreateApiUser("firstName", "lastname", email, "")
+		if err != nil {
+			panic("db error")
+		}
+	}
+
+	// check user has been well created
+	assert.Nil(t, err)
+
+	return testData{User: user}
 }

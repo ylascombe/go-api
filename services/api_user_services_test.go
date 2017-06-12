@@ -1,9 +1,9 @@
 package services
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/ylascombe/go-api/database"
+	"testing"
 )
 
 func TestCreateApiUser(t *testing.T) {
@@ -22,7 +22,7 @@ func TestCreateApiUser(t *testing.T) {
 	db := database.NewDBDriver()
 	defer db.Close()
 	//db.Delete(user)
-	res := db.Exec("delete from api_users where email = ?", email).Error;
+	res := db.Exec("delete from api_users where email = ?", email).Error
 	assert.Nil(t, res)
 
 }
@@ -32,4 +32,14 @@ func TestFindApiUsers(t *testing.T) {
 	result, err := ListApiUser()
 	assert.Nil(t, err)
 	assert.True(t, len(result.List) > 0)
+}
+
+func TestGetApiUserWhenUserIsAbsent(t *testing.T) {
+
+	// act
+	user, err := GetApiUser(99999999)
+
+	// assert
+	assert.NotNil(t, err)
+	assert.Nil(t, user)
 }

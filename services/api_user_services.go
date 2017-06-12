@@ -1,8 +1,8 @@
 package services
 
 import (
-	"github.com/ylascombe/go-api/models"
 	"github.com/ylascombe/go-api/database"
+	"github.com/ylascombe/go-api/models"
 )
 
 func ListApiUser() (models.ApiUsers, error) {
@@ -11,7 +11,7 @@ func ListApiUser() (models.ApiUsers, error) {
 
 	var users []models.ApiUser
 	//result := db.Find(&user, "Firstname = ?", "Yohan") // find product with FirstName Yohan
-	err := db.Find(&users).Error;
+	err := db.Find(&users).Error
 
 	apiUsers := models.ApiUsers{List: users}
 	return apiUsers, err
@@ -23,7 +23,7 @@ func CreateApiUser(firstName string, lastName string, email string, publicSSHKey
 	db := database.NewDBDriver()
 	defer db.Close()
 
-	err:= db.Create(&user).Error;
+	err := db.Create(&user).Error
 	//if err != nil {
 	//	fmt.Println(err)
 	//}
@@ -35,7 +35,7 @@ func CreateUser(user models.ApiUser) (models.ApiUser, error) {
 	db := database.NewDBDriver()
 	defer db.Close()
 
-	err:= db.Create(&user).Error;
+	err := db.Create(&user).Error
 	//if err != nil {
 	//	fmt.Println(err)
 	//}
@@ -49,8 +49,32 @@ func ListEnvironmentAccesses() (models.EnvironmentAccesses, error) {
 
 	var environmentAccesses []models.EnvironmentAccess
 	//result := db.Find(&user, "Firstname = ?", "Yohan") // find product with FirstName Yohan
-	err := db.Find(&environmentAccesses).Error;
+	err := db.Find(&environmentAccesses).Error
 
 	envAccesses := models.EnvironmentAccesses{List: environmentAccesses}
 	return envAccesses, err
+}
+
+func GetApiUser(userID uint) (*models.ApiUser, error) {
+	db := database.NewDBDriver()
+	defer db.Close()
+
+	var user models.ApiUser
+	err := db.First(&user, "ID = ?", userID).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func GetApiUserFromMail(email string) (models.ApiUser, error) {
+	db := database.NewDBDriver()
+	defer db.Close()
+
+	var user models.ApiUser
+	err := db.First(&user, "Email = ?", email).Error
+
+	return user, err
 }
