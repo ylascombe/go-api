@@ -31,7 +31,12 @@ func CreateMembership(apiUser models.ApiUser, team models.FeatureTeam) (*models.
 	if err != nil {
 		return nil, err
 	} else {
-		return membership, nil
+		res, err := GetMembership(apiUser.ID, team.ID)
+		if err == nil {
+			return res, nil
+		} else {
+			return nil, err
+		}
 	}
 }
 
@@ -48,7 +53,7 @@ func CreateMembershipFromIDs(apiUserID uint, featureTeamID uint) (*models.Member
 	} else {
 		err = db.First(&membership).Error
 
-		if err != nil {
+		if err == nil {
 			return &membership, nil
 		} else {
 			return nil ,err
@@ -91,4 +96,19 @@ func ListTeamMembers(featureTeamName string) (*models.Memberships, error) {
 	}
 
 	return &memberships, nil
+}
+
+func GetMembership(apiUserId uint, featureTeamId uint) (*models.Membership, error) {
+	db := database.NewDBDriver()
+	defer db.Close()
+
+	membership := models.Membership{ApiUserID: apiUserId, FeatureTeamID: featureTeamId}
+
+	err := db.First(&membership).Error
+
+	if err == nil {
+		return &membership, nil
+	} else {
+		return nil, err
+	}
 }

@@ -26,4 +26,3 @@ _testmain.go
 go-api
 *.iml
 test-data/tmp-*
-
