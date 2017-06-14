@@ -23,6 +23,10 @@ func main() {
 	router.HandleFunc("/v1/sshKeys/{name}", controllers.SSHPublicKeysForEnv)
 	router.HandleFunc("/v1/environmentAccess/{name}/user/{userID}", controllers.EnvironmentAccess)
 
+	router.HandleFunc("/v1/featureTeam", controllers.FeatureTeamCtrl)
+	router.HandleFunc("/v1/featureTeam/{name}", controllers.FeatureTeamCtrl)
+
+	router.HandleFunc("/v1/membership/{ftName}", controllers.MembershipCtrl)
 	//router.HandleFunc("/manifests", handleListManifests).Methods("GET")
 
 	// XXX keep it at the end of this function

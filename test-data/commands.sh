@@ -31,3 +31,18 @@ curl http://localhost:8080/v1/environmentAccess/LOCAL/user/$idUser2 -X PUT -H "C
 
 
 curl http://127.0.0.1:8080/v1/sshKeys/LOCAL
+
+curl http://127.0.0.1:8080/v1/featureTeam | jq
+curl http://127.0.0.1:8080/v1/featureTeam -X POST -H "Content-Type: application/json" -d @ft1.json
+idFT1=$(curl http://localhost:8080/v1/featureTeam | jq .featureTeams[0].ID)
+
+
+cat <<EOF > tmp-membership1.json
+{
+  "ID": 27,
+  "ApiUserID": $idUser1,
+  "FeatureTeamID": $idFT1
+}
+EOF
+curl http://127.0.0.1:8080/v1/membership/colis360 | jq
+curl http://127.0.0.1:8080/v1/membership/colis360 -X POST -H "Content-Type: application/json" -d @tmp-membership1.json

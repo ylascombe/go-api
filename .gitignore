@@ -25,4 +25,5 @@ _testmain.go
 .idea
 go-api
 *.iml
+test-data/tmp-*
 
