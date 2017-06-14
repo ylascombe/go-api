@@ -94,3 +94,22 @@ func createEnvironmentAccess(writer http.ResponseWriter, request *http.Request) 
 	}
 
 }
+
+func SSHPublicKeysForEnv(writer http.ResponseWriter, request *http.Request) {
+
+	vars := mux.Vars(request)
+	name := vars["name"]
+
+	result, err := services.ListSshPublicKeyForEnv(name)
+	if err == nil {
+		writer.WriteHeader(200)
+		fmt.Fprintf(writer, *result)
+		return
+	} else {
+		// if this code is executed, so there is an error
+		writer.WriteHeader(500)
+		resp := ApiResponse{ErrorMessage: string(err.Error())}
+		text := utils.Marshall(resp)
+		fmt.Fprintf(writer, text)
+	}
+}

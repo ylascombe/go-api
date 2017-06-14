@@ -1,17 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/ylascombe/go-api/config"
-	"github.com/ylascombe/go-api/models"
-	"github.com/ylascombe/go-api/services"
-	"github.com/ylascombe/go-api/utils"
 	"html"
 	"log"
 	"net/http"
-	"strconv"
 	"github.com/ylascombe/go-api/controllers"
 )
 
@@ -19,7 +13,6 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", Index)
-	router.HandleFunc("/reactive-platform/target/{target}/manifestversion/{version}", controllers.GetManifest)
 
 	router.HandleFunc("/v1/environment", controllers.Environment)
 	router.HandleFunc("/v1/environment/{name}", controllers.Environment)
@@ -27,12 +20,10 @@ func main() {
 	router.HandleFunc("/v1/user", controllers.User)
 
 	router.HandleFunc("/v1/environmentAccess/{name}", controllers.EnvironmentAccess)
+	router.HandleFunc("/v1/sshKeys/{name}", controllers.SSHPublicKeysForEnv)
 	router.HandleFunc("/v1/environmentAccess/{name}/user/{userID}", controllers.EnvironmentAccess)
 
 	//router.HandleFunc("/manifests", handleListManifests).Methods("GET")
-
-	// TODO remove me when tests done
-	router.HandleFunc("/testCommands", controllers.LaunchCommand)
 
 	// XXX keep it at the end of this function
 	log.Fatal(http.ListenAndServe(":8080", router))

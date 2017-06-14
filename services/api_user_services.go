@@ -20,20 +20,25 @@ func ListApiUser() (*models.ApiUsers, error) {
 	return &apiUsers, err
 }
 
-func CreateApiUser(firstName string, lastName string, email string, publicSSHKey string) (*models.ApiUser, error) {
+func CreateApiUser(firstName string, lastName string, pseudo string, email string, publicSSHKey string) (*models.ApiUser, error) {
 
-	user := models.ApiUser{Lastname: lastName, Firstname: firstName, Email: email, SshPublicKey: publicSSHKey}
 
-	db := database.NewDBDriver()
-	defer db.Close()
-
-	err := db.Create(&user).Error
+	user, err := models.NewApiUser(firstName, lastName, pseudo, email, publicSSHKey)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	db := database.NewDBDriver()
+	defer db.Close()
+
+	err = db.Create(&user).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func CreateUser(user models.ApiUser) (*models.ApiUser, error) {

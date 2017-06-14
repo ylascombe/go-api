@@ -5,6 +5,7 @@ import (
 	"github.com/ylascombe/go-api/database"
 	"github.com/ylascombe/go-api/models"
 	"fmt"
+	"bytes"
 )
 
 func ListEnvironment() (*[]models.Environment, error) {
@@ -165,4 +166,42 @@ func GetEnvironment(id uint) (*models.Environment, error) {
 	}
 
 	return &environment, nil
+}
+
+func ListSshPublicKeyForEnv(envName string) (*string, error) {
+
+	environment, err := GetEnvironmentByName(envName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	envAccesses := []models.EnvironmentAccess{}
+
+	db := database.NewDBDriver()
+	defer db.Close()
+
+
+	err = db.Model(environment).Related(&envAccesses).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	var buffer bytes.Buffer
+
+	for i:=0; i< len(envAccesses); i++ {
+
+		user, err := GetApiUser(envAccesses[i].ApiUserID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		buffer.WriteString(user.SshPublicKey + " " + user.Pseudo + "\n")
+	}
+
+	result := buffer.String()
+	return &result, nil
+
 }

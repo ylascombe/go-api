@@ -284,6 +284,35 @@ func TestListAccessForEnvironmentWhenOne(t *testing.T) {
 	assert.Equal(t, firstName, res.List[0].ApiUser.Firstname)
 	assert.Equal(t, lastName, res.List[0].ApiUser.Lastname)
 	assert.Equal(t, sshPubKey, res.List[0].ApiUser.SshPublicKey)
+	assert.Equal(t, pseudo, res.List[0].ApiUser.Pseudo)
+	tearDown(t)
+}
+
+func TestListSshPublicKeyForEnv(t *testing.T) {
+	// arrange
+	user1, err := CreateApiUser("one", "plus", "oplus", "one@corp.com","ssh-id-rsa num1")
+	if err != nil {
+		panic("db error")
+	}
+
+	user2, err := CreateApiUser("two", "bar", "tbar", "two@corp.com", "ssh-id-rsa num2")
+	if err != nil {
+		panic("db error")
+	}
+	env, _ := CreateEnvironment(envName)
+	GiveAccessTo(env, *user1)
+	GiveAccessTo(env, *user2)
+
+	// act
+	res, err := ListSshPublicKeyForEnv(envName)
+
+	// assert
+	assert.Nil(t, err)
+	assert.NotNil(t, res)
+
+	assert.Equal(t, "ssh-id-rsa num1 oplus\nssh-id-rsa num2 tbar\n", *res)
+
+	// clean
 	tearDown(t)
 }
 
@@ -294,8 +323,8 @@ func tearDown(t *testing.T) {
 	db := database.NewDBDriver()
 	defer db.Close()
 	//db.Delete(user)
-	res1 := db.Exec("delete from api_users").Error
 	res2 := db.Exec("delete from environment_accesses").Error
+	res1 := db.Exec("delete from api_users").Error
 	res3 := db.Exec("delete from environments").Error
 
 	if res1 != nil || res2 != nil || res3 != nil {
@@ -311,7 +340,7 @@ func setUp(t *testing.T) testData {
 
 	if err != nil {
 		// prerequisites
-		user, err = CreateApiUser(firstName, lastName, email, sshPubKey)
+		user, err = CreateApiUser(firstName, lastName, pseudo, email, sshPubKey)
 		if err != nil {
 			panic("db error")
 		}

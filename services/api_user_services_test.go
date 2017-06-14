@@ -12,6 +12,7 @@ var (
 	email = "john@doe.org"
 	firstName = "john"
 	lastName = "doe"
+	pseudo = "jdoe"
 	sshPubKey = "ssh-rsa XYZ"
 )
 
@@ -26,7 +27,7 @@ func TestCreateApiUser(t *testing.T) {
 	db.Model(&models.ApiUser{}).Count(&countBefore)
 
 	// act
-	user, err := CreateApiUser(firstName, lastName, email, sshPubKey)
+	user, err := CreateApiUser(firstName, lastName, email, pseudo, sshPubKey)
 
 	// assert
 	db.Model(&models.ApiUser{}).Count(&countAfter)
@@ -55,7 +56,7 @@ func TestListApiUserWhenNoUser(t *testing.T) {
 func TestListApiUserWhenOneUser(t *testing.T) {
 
 	// arrange
-	CreateApiUser(firstName, lastName, email, sshPubKey)
+	CreateApiUser(firstName, lastName, email, pseudo, sshPubKey)
 
 	// act
 	users, err := ListApiUser()
