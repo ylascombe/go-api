@@ -25,4 +25,5 @@ func AutoMigrateDB(db *gorm.DB) {
 	db.AutoMigrate(&models.ApiUser{})
 	db.AutoMigrate(&models.Environment{})
 	db.AutoMigrate(&models.EnvironmentAccess{})
+	db.AutoMigrate(&models.FeatureTeam{})
 }
