@@ -9,14 +9,18 @@ import (
 )
 
 func TestCreateMembership(t *testing.T) {
+
+	tearDownMembership(t)
 	// arrange
 	featureTeam, _ := models.NewFeatureTeam(ftName)
 	CreateFeatureTeam(*featureTeam)
-	apiUser, _ := CreateApiUser(firstName, lastName, pseudo, email, sshPubKey)
+	featureTeam, _ = GetFeatureTeamFromName(ftName)
+
+	CreateApiUser(firstName, lastName, pseudo, email, sshPubKey)
+	apiUser, _ := GetApiUserFromMail(email)
 
 	// act
 	membership, err := CreateMembership(*apiUser, *featureTeam)
-
 
 	// assert
 	assert.Nil(t, err)
@@ -99,7 +103,31 @@ func TestCreateMembershipFromIDs(t *testing.T) {
 	// assert
 	assert.Nil(t, err)
 	assert.NotNil(t, membership)
-	//assert.Equal(t, 1, len(res.List))
+
+	//clean
+	tearDownMembership(t)
+}
+
+func TestCreateMembershipAlreadyExists(t *testing.T) {
+	// arrange
+	featureTeam, _ := models.NewFeatureTeam(ftName)
+	CreateFeatureTeam(*featureTeam)
+	CreateApiUser(firstName, lastName, pseudo, email, sshPubKey)
+
+	featureTeam, _ = GetFeatureTeamFromName(ftName)
+	apiUser, _ := GetApiUserFromMail(email)
+
+	// create a first time
+	membership, err := CreateMembershipFromIDs(apiUser.ID, featureTeam.ID)
+
+	// act
+	membership, err = CreateMembershipFromIDs(apiUser.ID, featureTeam.ID)
+
+	// assert
+	assert.NotNil(t, err)
+	assert.Nil(t, membership)
+
+
 
 	//clean
 	tearDownMembership(t)

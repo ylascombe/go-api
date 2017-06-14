@@ -1,17 +1,20 @@
 package models
 
 import (
-	"github.com/ylascombe/go-api/gorm_custom"
 	"errors"
+	"time"
 )
 
 type Membership struct {
-	gorm_custom.GormModelCustom
+	// specify manually ID since it is a composed key
+	ApiUserID     uint `gorm:"primary_key"`
+	FeatureTeamID uint `gorm:"primary_key"`
+	CreatedAt     *time.Time `json:"-" yaml:"-"`
+	UpdatedAt     *time.Time `json:"-" yaml:"-"`
+	DeletedAt     *time.Time `sql:"index" json:"-" yaml:"-"`
 
 	ApiUser       ApiUser `gorm:"ForeignKey:ApiUserID"`
-	ApiUserID     uint
 	FeatureTeam   FeatureTeam `gorm:"ForeignKey:FeatureTeamID"`
-	FeatureTeamID uint
 }
 
 func (membership Membership) IsValid() bool {
@@ -22,9 +25,9 @@ func (membership Membership) IsValid() bool {
 }
 
 func NewMembership(apiUser ApiUser, featureTeam FeatureTeam) (*Membership, error) {
-	if apiUser.IsValid() && featureTeam.IsValid() {
-		return &Membership{ApiUser: apiUser, FeatureTeam: featureTeam}, nil
+	if apiUser.ID != 0 && featureTeam.ID != 0 {
+		return &Membership{ApiUser: apiUser, ApiUserID: apiUser.ID, FeatureTeam: featureTeam, FeatureTeamID: featureTeam.ID}, nil
 	} else {
-		return nil, errors.New("Invalid parameters")
+		return nil, errors.New("Invalid parameters when create Membership")
 	}
 }
