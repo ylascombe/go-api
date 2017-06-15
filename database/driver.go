@@ -27,4 +27,10 @@ func AutoMigrateDB(db *gorm.DB) {
 	db.AutoMigrate(&models.EnvironmentAccess{})
 	db.AutoMigrate(&models.FeatureTeam{})
 	db.AutoMigrate(&models.Membership{})
+	db.AutoMigrate(&models.Artefact{})
+	db.AutoMigrate(&models.CommonConfig{})
+	db.AutoMigrate(&models.AppModule{})
+	db.AutoMigrate(&models.Application{})
+	db.AutoMigrate(&models.ReactivePlatform{})
+	db.AutoMigrate(&models.Manifest{})
 }

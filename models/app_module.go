@@ -1,9 +1,12 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/ylascombe/go-api/gorm_custom"
+)
 
 type AppModule struct {
-	gorm.Model
+	gorm_custom.GormModelCustom
+
 	Artefact     Artefact
 	CommonConfig CommonConfig
 }
