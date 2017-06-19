@@ -5,38 +5,50 @@ import (
 	"net/http"
 	"github.com/ylascombe/go-api/services"
 	"github.com/ylascombe/go-api/models"
-	"github.com/ylascombe/go-api/utils"
+	"github.com/gin-gonic/gin"
 )
 
-func FeatureTeamCtrl(writer http.ResponseWriter, req *http.Request) {
-	fmt.Println(req.Method)
-	switch req.Method {
-	case "GET":
-		fts, err := services.ListFeatureTeams()
-		genericReadResponse(writer, req, fts, err)
-	case "POST":
-		createFeatureTeam(writer, req)
+func FetchAllFeatureTeams(c *gin.Context) {
+	var teams *models.FeatureTeams
+	var _teams []models.TransformedFeatureTeam
+
+	teams, err := services.ListFeatureTeams()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "error message" : err})
+		return
 	}
+
+	if (len(teams.List) <= 0) {
+		c.JSON(http.StatusNotFound, gin.H{"status" : http.StatusNotFound, "message" : "No feature team found!"})
+		return
+	}
+
+	//transforms the features teams
+	for _, item := range teams.List {
+		transformed := models.TransformFeatureTeam(item)
+		_teams = append(_teams, *transformed)
+	}
+	c.JSON(http.StatusOK, _teams)
 }
 
-func createFeatureTeam(writer http.ResponseWriter, request *http.Request) {
-	var ft models.FeatureTeam
-	utils.ReadObjectFromJSONInput(&ft, writer, request)
+func CreateFeatureTeam(c *gin.Context) {
 
-	if ft.IsValid() {
-		_, err := services.CreateFeatureTeam(ft)
-		if err == nil {
-			writer.WriteHeader(200)
-		} else {
-			writer.WriteHeader(409)
-			resp := ApiResponse{ErrorMessage: string(err.Error())}
-			text := utils.Marshall(resp)
-			fmt.Fprintf(writer, text)
-		}
+	var json models.FeatureTeam
+
+	err := c.BindJSON(&json)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status" : http.StatusBadRequest, "message" : "Invalid request.", "error detail": err})
 	} else {
-		writer.WriteHeader(400)
-		resp := ApiResponse{ErrorMessage: "Given parameters are empty or not valid"}
-		text := utils.Marshall(resp)
-		fmt.Fprintf(writer, text)
+		res, err := services.CreateFeatureTeam(json)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "message" : "Error while creating user", "error detail": err})
+		} else {
+			c.Set("Location", fmt.Sprintf("/v1/teams/", res.ID))
+			c.JSON(http.StatusCreated, gin.H{"status" : http.StatusCreated, "message" : "User created successfully!", "featureteam_id": res.ID})
+		}
 	}
+
+
 }

@@ -15,6 +15,16 @@ type ApiUser struct {
 	Pseudo       string `json:"pseudo" yaml:"pseudo"`
 }
 
+type TransformedApiUser struct {
+	ID        uint       `gorm:"primary_key" yaml:"ID" json:"ID"`
+
+	Firstname    string `json:"firstname" yaml:"firstname"`
+	Lastname     string `json:"lastname" yaml:"lastname"`
+	Email        string `gorm:"not null;unique" json:"email" yaml:"email"`
+	SshPublicKey string `json:"ssh_public_key" yaml:"ssh_public_key"`
+	Pseudo       string `json:"pseudo" yaml:"pseudo"`
+}
+
 func NewApiUser(firstname string, lastname string, pseudo string, email string, sshPublicKey string) (*ApiUser, error) {
 	apiUser := ApiUser{Firstname: firstname, Lastname: lastname, Email: email, Pseudo: pseudo, SshPublicKey: sshPublicKey}
 
@@ -31,4 +41,15 @@ func (apiUser ApiUser) IsValid() bool {
 		apiUser.Lastname != "" &&
 		apiUser.Firstname != "" &&
 		apiUser.Pseudo != ""
+}
+
+func TransformApiUser(apiUser ApiUser) *TransformedApiUser {
+	return &TransformedApiUser{
+		ID: apiUser.ID,
+		Firstname: apiUser.Firstname,
+		Lastname: apiUser.Lastname,
+		Email: apiUser.Email,
+		SshPublicKey: apiUser.SshPublicKey,
+		Pseudo: apiUser.Pseudo,
+	}
 }

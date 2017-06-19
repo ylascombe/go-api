@@ -1,3 +1,5 @@
 {
-  "name": "colis360"
+  "name": "colis360",
+  "gitlab_url": "http://gitlab.url/colis360",
+  "group_id": "fr.laposte.colis360"
 }

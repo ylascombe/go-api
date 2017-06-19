@@ -9,3 +9,16 @@ type Environment struct {
 
 	Name string `gorm:"not null;unique"`
 }
+
+
+type TransformedEnvironment struct {
+	ID uint `json:"id"`
+	Name string `gorm:"not null;unique"`
+}
+
+func TransformEnvironment(environment Environment) *TransformedEnvironment {
+	return &TransformedEnvironment{
+		ID: environment.ID,
+		Name: environment.Name,
+	}
+}

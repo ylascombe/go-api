@@ -2,61 +2,87 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"html"
-	"log"
 	"net/http"
 	"github.com/ylascombe/go-api/controllers"
+	"github.com/gin-gonic/gin"
+	"github.com/ylascombe/go-api/database"
 )
 
 func main() {
 
-	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", Index)
+	db := database.NewDBDriver()
+	database.AutoMigrateDB(db)
 
-	router.HandleFunc("/v1/environment", controllers.Environment)
-	router.HandleFunc("/v1/environment/{name}", controllers.Environment)
+	router := gin.Default()
 
-	router.HandleFunc("/v1/user", controllers.User)
+	users := router.Group("/v1/users")
+	{
+		users.GET("/", controllers.FetchAllUsers)
+		//users.GET("/:name", controllers.GetUser)
+		users.POST("/", controllers.CreateUser)
+	}
 
-	router.HandleFunc("/v1/environmentAccess/{name}", controllers.EnvironmentAccess)
-	router.HandleFunc("/v1/sshKeys/{name}", controllers.SSHPublicKeysForEnv)
-	router.HandleFunc("/v1/environmentAccess/{name}/user/{userID}", controllers.EnvironmentAccess)
+	environments := router.Group("/v1/environments")
+	{
+		environments.GET("/", controllers.FetchAllEnvironments)
+		environments.GET("/:name", controllers.GetEnvironment)
+		environments.POST("/:name", controllers.CreateEnvironment)
+	}
 
-	router.HandleFunc("/v1/featureTeam", controllers.FeatureTeamCtrl)
-	router.HandleFunc("/v1/featureTeam/{name}", controllers.FeatureTeamCtrl)
+	// TODO pluralize "environment" term in uri
+	// like that : https://github.com/gin-gonic/gin/issues/205
+	environmentsAccess := router.Group("/v1/environment/:env-name/access")
+	{
+		environmentsAccess.GET("/", controllers.GetEnvironmentAccess)
+		//environmentsAccess.GET("/:name", controllers.GetEnvironmentAccess)
+		environmentsAccess.POST("/:user-id", controllers.CreateEnvironmentAccess)
+	}
 
-	router.HandleFunc("/v1/membership/{ftName}", controllers.MembershipCtrl)
-	//router.HandleFunc("/manifests", handleListManifests).Methods("GET")
+	environmentsAccessKey := router.Group("/v1/ssh-keys")
+	{
+		environmentsAccessKey.GET("/:env-name", controllers.SSHPublicKeysForEnv)
+	}
 
-	// XXX keep it at the end of this function
-	log.Fatal(http.ListenAndServe(":8080", router))
+	featureTeams := router.Group("/v1/teams")
+	{
+		featureTeams.GET("/", controllers.FetchAllFeatureTeams)
+		//featureTeams.GET("/:name", controllers.GetFeatureTeam)
+		//featureTeams.POST("/:name", controllers.CreateFeatureTeam)
+		featureTeams.POST("/", controllers.CreateFeatureTeam)
+	}
+
+	membership := router.Group("/v1/teams/:team-name/user")
+	{
+		membership.GET("/", controllers.FetchAllMember)
+		//featureTeams.GET("/:name", controllers.GetFeatureTeam)
+		//featureTeams.POST("/:name", controllers.CreateFeatureTeam)
+		membership.POST("/:user-id", controllers.CreateMembership)
+	}
+
+	router.Run()
+
+
+	//router := mux.NewRouter().StrictSlash(true)
+	//router.HandleFunc("/", Index)
+	//
+	//router.HandleFunc("/v1/user", controllers.User)
+	//
+	//router.HandleFunc("/v1/environmentAccess/{name}", controllers.EnvironmentAccess)
+	//router.HandleFunc("/v1/sshKeys/{name}", controllers.SSHPublicKeysForEnv)
+	//router.HandleFunc("/v1/environmentAccess/{name}/user/{userID}", controllers.EnvironmentAccess)
+	//
+	//router.HandleFunc("/v1/featureTeam", controllers.FeatureTeamCtrl)
+	//router.HandleFunc("/v1/featureTeam/{name}", controllers.FeatureTeamCtrl)
+	//
+	//router.HandleFunc("/v1/membership/{ftName}", controllers.MembershipCtrl)
+	////router.HandleFunc("/manifests", handleListManifests).Methods("GET")
+	//
+	//// XXX keep it at the end of this function
+	//log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 }
 
-
-// TODO comprendre pourquoi cette factorisation ne marche pas (c'est problème l'interface Validable)
-//func readObjectAndCallCreateFunction(toCreate models.Validable, fct func(models.Validable) (models.Validable, error), writer http.ResponseWriter, request *http.Request) {
-//
-//	utils.ReadObjectFromJSONInput(&toCreate, writer, request)
-//
-//	if toCreate.IsValid() {
-//		_, err := fct(toCreate)
-//		if err == nil {
-//			writer.WriteHeader(200)
-//		} else {
-//			writer.WriteHeader(409)
-//			resp := controllers.ApiResponse{ErrorMessage: string(err.Error())}
-//			text := utils.Marshall(resp)
-//			fmt.Fprintf(writer, text)
-//		}
-//	} else {
-//		writer.WriteHeader(400)
-//		resp := controllers.ApiResponse{ErrorMessage: "Given parameters are empty or not valid"}
-//		text := utils.Marshall(resp)
-//		fmt.Fprintf(writer, text)
-//	}
-//}

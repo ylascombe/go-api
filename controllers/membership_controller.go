@@ -5,40 +5,53 @@ import (
 	"net/http"
 	"github.com/ylascombe/go-api/services"
 	"github.com/ylascombe/go-api/models"
-	"github.com/ylascombe/go-api/utils"
-	"github.com/gorilla/mux"
+	"strconv"
+	"github.com/gin-gonic/gin"
 )
 
-func MembershipCtrl(writer http.ResponseWriter, req *http.Request) {
-	switch req.Method {
-	case "GET":
-		vars := mux.Vars(req)
-		ftName := vars["ftName"]
-		members, err := services.ListTeamMembers(ftName)
-		genericReadResponse(writer, req, members, err)
-	case "POST":
-		createMembership(writer, req)
+func CreateMembership(c *gin.Context) {
+	teamName := c.Param("team-name")
+	userID := c.Param("user-id")
+	intUserID, _ := strconv.Atoi(userID)
+	uintUserID := uint(intUserID)
+
+	featureTeam, err := services.GetFeatureTeamFromName(teamName)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"status" : http.StatusNotFound, "message" : fmt.Sprintf("No feature team name %s found!", teamName)})
+		return
+	}
+
+	_, err = services.CreateMembershipFromIDs(uintUserID, featureTeam.ID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "message" : "Error while creating environment access", "error detail": err})
+	} else {
+		c.JSON(http.StatusCreated, gin.H{"status" : http.StatusCreated, "message" : fmt.Sprintf("User %s has been added to team %s!", userID, teamName)})
+		// TODO return location
 	}
 }
 
-func createMembership(writer http.ResponseWriter, request *http.Request) {
-	var membership models.Membership
-	utils.ReadObjectFromJSONInput(&membership, writer, request)
+func FetchAllMember(c *gin.Context) {
+	teamName := c.Param("team-name")
+	var _memberships []models.TransformedMembership
 
-	if membership.FeatureTeamID != 0 && membership.ApiUserID != 0 {
-		_, err := services.CreateMembershipFromIDs(membership.ApiUserID, membership.FeatureTeamID)
-		if err == nil {
-			writer.WriteHeader(200)
-		} else {
-			writer.WriteHeader(409)
-			resp := ApiResponse{ErrorMessage: string(err.Error())}
-			text := utils.Marshall(resp)
-			fmt.Fprintf(writer, text)
-		}
-	} else {
-		writer.WriteHeader(400)
-		resp := ApiResponse{ErrorMessage: "Given parameters are empty or not valid"}
-		text := utils.Marshall(resp)
-		fmt.Fprintf(writer, text)
+	memberships, err := services.ListTeamMembers(teamName)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "error message" : err})
+		return
 	}
+
+	if (len(memberships.List) <= 0) {
+		c.JSON(http.StatusNotFound, gin.H{"status" : http.StatusNotFound, "message" : fmt.Sprintf("No members found for team %s!", teamName)})
+		return
+	}
+
+	//transforms features teams
+	for _, item := range memberships.List {
+		tmp := models.TransformMembership(item)
+		_memberships = append(_memberships, *tmp)
+	}
+	c.JSON(http.StatusOK, _memberships)
 }

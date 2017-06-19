@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/ylascombe/go-api/database"
 	"github.com/ylascombe/go-api/models"
+	"fmt"
 )
 
 func ListApiUser() (*models.ApiUsers, error) {
@@ -22,10 +23,10 @@ func ListApiUser() (*models.ApiUsers, error) {
 
 func CreateApiUser(firstName string, lastName string, pseudo string, email string, publicSSHKey string) (*models.ApiUser, error) {
 
-
 	user, err := models.NewApiUser(firstName, lastName, pseudo, email, publicSSHKey)
 
-	if err != nil {
+	if err != nil || ! user.IsValid() {
+		fmt.Println("user is not valid")
 		return nil, err
 	}
 
@@ -38,7 +39,13 @@ func CreateApiUser(firstName string, lastName string, pseudo string, email strin
 		return nil, err
 	}
 
-	return user, nil
+	res, err := GetApiUserFromMail(email)
+
+	if err != nil {
+		return nil, err
+	} else {
+		return res, nil
+	}
 }
 
 func CreateUser(user models.ApiUser) (*models.ApiUser, error) {
