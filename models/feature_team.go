@@ -22,7 +22,10 @@ type TransformedFeatureTeam struct {
 }
 
 func (featureTeam FeatureTeam) IsValid() bool {
-	return FeatureTeam{} != featureTeam && featureTeam.Name != ""
+	return FeatureTeam{} != featureTeam &&
+		featureTeam.Name != "" &&
+		featureTeam.GroupId != "" &&
+		featureTeam.GitlabUrl != ""
 }
 
 func NewFeatureTeam(name string) (*FeatureTeam, error) {

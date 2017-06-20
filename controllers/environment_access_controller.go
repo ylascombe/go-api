@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"strconv"
 	"net/http"
 	"github.com/ylascombe/go-api/services"
@@ -35,9 +34,9 @@ func GetEnvironmentAccess(c *gin.Context) {
 		return
 	}
 
-	if (environmentAccesses.List == nil) {
-		c.JSON(http.StatusNotFound, gin.H{"status" : http.StatusNotFound, "message" : fmt.Sprintf("No access found for environment %s!", envName)})
-		return
+	if (len(environmentAccesses.List) == 0) {
+		// choice : if no environment found, return a HTTP status code 200 with an empty array
+		_environmentAccesses = make([]models.TransformedEnvironmentAccess, 0)
 	}
 
 	//transforms for building a good response

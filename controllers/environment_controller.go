@@ -21,8 +21,8 @@ func FetchAllEnvironments(c *gin.Context) {
 	}
 
 	if (len(*environments) <= 0) {
-		c.JSON(http.StatusNotFound, gin.H{"status" : http.StatusNotFound, "message" : "No environment found!"})
-		return
+		// choice : if no environment found, return a HTTP status code 200 with an empty array
+		_environments = make([]models.TransformedEnvironment, 0)
 	}
 
 	//transforms the todos for building a good response

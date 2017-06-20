@@ -20,8 +20,8 @@ func FetchAllUsers(c *gin.Context) {
 	}
 
 	if (len(users.List) <= 0) {
-		c.JSON(http.StatusNotFound, gin.H{"status" : http.StatusNotFound, "message" : "No users found!"})
-		return
+		// choice : if no user found, return a HTTP status code 200 with an empty array
+		_users = make([]models.TransformedApiUser, 0)
 	}
 
 	//transforms the users

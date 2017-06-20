@@ -20,8 +20,8 @@ func FetchAllFeatureTeams(c *gin.Context) {
 	}
 
 	if (len(teams.List) <= 0) {
-		c.JSON(http.StatusNotFound, gin.H{"status" : http.StatusNotFound, "message" : "No feature team found!"})
-		return
+		// choice : if no feature team found, return a HTTP status code 200 with an empty array
+		_teams = make([]models.TransformedFeatureTeam, 0)
 	}
 
 	//transforms the features teams

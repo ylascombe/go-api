@@ -44,8 +44,8 @@ func FetchAllMember(c *gin.Context) {
 	}
 
 	if (len(memberships.List) <= 0) {
-		c.JSON(http.StatusNotFound, gin.H{"status" : http.StatusNotFound, "message" : fmt.Sprintf("No members found for team %s!", teamName)})
-		return
+		// choice : if no membership found, return a HTTP status code 200 with an empty array
+		_memberships = make([]models.TransformedMembership, 0)
 	}
 
 	//transforms features teams
