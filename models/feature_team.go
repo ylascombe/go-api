@@ -14,11 +14,11 @@ type FeatureTeam struct {
 }
 
 type TransformedFeatureTeam struct {
-	ID        uint       `gorm:"primary_key" yaml:"ID" json:"ID"`
+	ID        uint       `yaml:"ID" json:"ID"`
 
-	Name      string `gorm:"not null;unique" json:"name" yaml:"name"`
-	GitlabUrl string `gorm:"not null;unique" json:"gitlab_url" yaml:"gitlab_url"`
-	GroupId   string `gorm:"not null;unique" json:"group_id" yaml:"group_id"`
+	Name      string `json:"name" yaml:"name"`
+	GitlabUrl string `json:"gitlab_url" yaml:"gitlab_url"`
+	GroupId   string `json:"group_id" yaml:"group_id"`
 }
 
 func (featureTeam FeatureTeam) IsValid() bool {

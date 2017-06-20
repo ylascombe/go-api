@@ -16,11 +16,11 @@ type ApiUser struct {
 }
 
 type TransformedApiUser struct {
-	ID        uint       `gorm:"primary_key" yaml:"ID" json:"ID"`
+	ID        uint      `yaml:"ID" json:"ID"`
 
 	Firstname    string `json:"firstname" yaml:"firstname"`
 	Lastname     string `json:"lastname" yaml:"lastname"`
-	Email        string `gorm:"not null;unique" json:"email" yaml:"email"`
+	Email        string `json:"email" yaml:"email"`
 	SshPublicKey string `json:"ssh_public_key" yaml:"ssh_public_key"`
 	Pseudo       string `json:"pseudo" yaml:"pseudo"`
 }

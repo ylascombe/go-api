@@ -18,15 +18,14 @@ type Membership struct {
 }
 
 type TransformedMembership struct {
-	// specify manually ID since it is a composed key
-	ApiUserID     uint `gorm:"primary_key"`
-	FeatureTeamID uint `gorm:"primary_key"`
+	ApiUserID     uint `json:"api_user_id" yaml:"api_user_id"`
+	FeatureTeamID uint `json:"team_id" yaml:"team_id"`
 	CreatedAt     *time.Time `json:"-" yaml:"-"`
 	UpdatedAt     *time.Time `json:"-" yaml:"-"`
-	DeletedAt     *time.Time `sql:"index" json:"-" yaml:"-"`
+	DeletedAt     *time.Time `json:"-" yaml:"-"`
 
-	TransformedApiUser       TransformedApiUser `gorm:"ForeignKey:ApiUserID"`
-	TransformedFeatureTeam   TransformedFeatureTeam `gorm:"ForeignKey:FeatureTeamID"`
+	TransformedApiUser       TransformedApiUser `json:"api_user" yaml:"api_user"`
+	TransformedFeatureTeam   TransformedFeatureTeam `json:"team" yaml:"team"`
 }
 
 func (membership Membership) IsValid() bool {

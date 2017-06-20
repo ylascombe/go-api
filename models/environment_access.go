@@ -14,12 +14,12 @@ type EnvironmentAccess struct {
 }
 
 type TransformedEnvironmentAccess struct {
-	ID uint `json:"id"`
+	ID                     uint `json:"id"`
 
-	TransformedApiUser       TransformedApiUser `gorm:"ForeignKey:ApiUserID"`
-	ApiUserID     uint
-	TransformedEnvironment   TransformedEnvironment `gorm:"ForeignKey:EnvironmentID"`
-	EnvironmentID uint
+	TransformedApiUser     TransformedApiUser `json:"api_user" yaml:"api_user"`
+	ApiUserID              uint        `json:"api_user_id" yaml:"api_user_id"`
+	TransformedEnvironment TransformedEnvironment `json:"environment" yaml:"environment"`
+	EnvironmentID          uint `json:"environment_id" yaml:"environment_id"`
 }
 
 func (envAccess EnvironmentAccess) IsValid() bool {
