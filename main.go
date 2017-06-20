@@ -1,12 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"html"
-	"net/http"
 	"github.com/ylascombe/go-api/controllers"
-	"github.com/gin-gonic/gin"
 	"github.com/ylascombe/go-api/database"
+	"github.com/itsjamie/gin-cors"
+	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func main() {
@@ -14,7 +13,18 @@ func main() {
 	db := database.NewDBDriver()
 	database.AutoMigrateDB(db)
 
-	router := gin.Default()
+	router := gin.New()
+	// Apply the middleware to the router (works with groups too)
+	router.Use(cors.Middleware(cors.Config{
+		Origins:        "*",
+		Methods:        "GET, PUT, POST, DELETE",
+		RequestHeaders: "Origin, Authorization, Content-Type",
+		ExposedHeaders: "",
+		MaxAge: 50 * time.Second,
+		Credentials: true,
+		ValidateHeaders: false,
+	}))
+
 
 	users := router.Group("/v1/users")
 	{
@@ -59,28 +69,4 @@ func main() {
 	}
 
 	router.Run(":8090")
-
-
-	//router := mux.NewRouter().StrictSlash(true)
-	//router.HandleFunc("/", Index)
-	//
-	//router.HandleFunc("/v1/user", controllers.User)
-	//
-	//router.HandleFunc("/v1/environmentAccess/{name}", controllers.EnvironmentAccess)
-	//router.HandleFunc("/v1/sshKeys/{name}", controllers.SSHPublicKeysForEnv)
-	//router.HandleFunc("/v1/environmentAccess/{name}/user/{userID}", controllers.EnvironmentAccess)
-	//
-	//router.HandleFunc("/v1/featureTeam", controllers.FeatureTeamCtrl)
-	//router.HandleFunc("/v1/featureTeam/{name}", controllers.FeatureTeamCtrl)
-	//
-	//router.HandleFunc("/v1/membership/{ftName}", controllers.MembershipCtrl)
-	////router.HandleFunc("/manifests", handleListManifests).Methods("GET")
-	//
-	//// XXX keep it at the end of this function
-	//log.Fatal(http.ListenAndServe(":8080", router))
 }
-
-func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
-}
-
