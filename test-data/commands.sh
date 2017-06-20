@@ -25,9 +25,9 @@ cat <<EOF > tmp-access2.json
 }
 EOF
 
-curl http://localhost:8090/v1/environment/LOCAL/access/ | jq
-curl http://localhost:8090/v1/environment/LOCAL/access/$idUser1 -X POST -H "Content-Type: application/json" -d @tmp-access1.json
-curl http://localhost:8090/v1/environment/LOCAL/access/$idUser2 -X POST -H "Content-Type: application/json" -d @tmp-access2.json
+curl http://localhost:8090/v1/environments/LOCAL/access/ | jq
+curl http://localhost:8090/v1/environments/LOCAL/access/$idUser1 -X POST -H "Content-Type: application/json" -d @tmp-access1.json
+curl http://localhost:8090/v1/environments/LOCAL/access/$idUser2 -X POST -H "Content-Type: application/json" -d @tmp-access2.json
 
 
 curl http://127.0.0.1:8090/v1/ssh-keys/LOCAL

@@ -35,7 +35,7 @@ func FetchAllEnvironments(c *gin.Context) {
 
 func GetEnvironment(c *gin.Context) {
 	var environment *models.Environment
-	envName := c.Param("name")
+	envName := c.Param("env-name")
 
 	environment, err := services.GetEnvironmentByName(envName)
 
@@ -54,7 +54,7 @@ func GetEnvironment(c *gin.Context) {
 }
 
 func CreateEnvironment(c *gin.Context) {
-	envName := c.Param("name")
+	envName := c.Param("env-name")
 	environment, err := services.CreateEnvironment(envName)
 
 	if err != nil {

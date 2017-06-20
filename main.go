@@ -26,15 +26,13 @@ func main() {
 	environments := router.Group("/v1/environments")
 	{
 		environments.GET("/", controllers.FetchAllEnvironments)
-		environments.GET("/:name", controllers.GetEnvironment)
-		environments.POST("/:name", controllers.CreateEnvironment)
+		environments.GET("/:env-name", controllers.GetEnvironment)
+		environments.POST("/:env-name", controllers.CreateEnvironment)
 	}
 
-	// TODO pluralize "environment" term in uri
-	// like that : https://github.com/gin-gonic/gin/issues/205
-	environmentsAccess := router.Group("/v1/environment/:env-name/access")
+	environmentsAccess := router.Group("/v1/environments/:env-name/access")
 	{
-		environmentsAccess.GET("/", controllers.GetEnvironmentAccess)
+		environmentsAccess.GET("/", controllers.GetEnvironmentAccess )
 		//environmentsAccess.GET("/:name", controllers.GetEnvironmentAccess)
 		environmentsAccess.POST("/:user-id", controllers.CreateEnvironmentAccess)
 	}
