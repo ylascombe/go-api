@@ -5,6 +5,7 @@ import (
 	"github.com/ylascombe/go-api/services"
 	"github.com/ylascombe/go-api/models"
 	"github.com/gin-gonic/gin"
+	"fmt"
 )
 
 
@@ -54,11 +55,17 @@ func GetEnvironment(c *gin.Context) {
 
 func CreateEnvironment(c *gin.Context) {
 	envName := c.Param("name")
-	_, err := services.CreateEnvironment(envName)
+	environment, err := services.CreateEnvironment(envName)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "message" : "Error while creating environment", "error detail": err})
 	} else {
-		c.JSON(http.StatusCreated, gin.H{"status" : http.StatusCreated, "message" : "Environment created successfully!", "env_name": envName})
+		c.JSON(http.StatusCreated, gin.H{
+			"status" : http.StatusCreated,
+			"message" : "Environment created successfully!",
+			"env_name": envName,
+			"env_id": environment.ID,
+			"Location": fmt.Sprintf("/v1/environments/%s", environment.Name),
+		})
 	}
 }

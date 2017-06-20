@@ -44,8 +44,12 @@ func CreateUser(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "message" : "Error while creating user", "error detail": err})
 		} else {
-			c.Set("Location", fmt.Sprintf("/v1/user/", user.ID))
-			c.JSON(http.StatusCreated, gin.H{"status" : http.StatusCreated, "message" : "User created successfully!", "user_id": user.ID})
+			c.JSON(http.StatusCreated, gin.H{
+				"status" : http.StatusCreated,
+				"message" : "User created successfully!",
+				"user_id": user.ID,
+				"Location": fmt.Sprintf("/v1/user/%v", user.ID),
+			})
 		}
 	}
 

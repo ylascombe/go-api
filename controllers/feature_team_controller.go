@@ -45,8 +45,12 @@ func CreateFeatureTeam(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "message" : "Error while creating user", "error detail": err})
 		} else {
-			c.Set("Location", fmt.Sprintf("/v1/teams/", res.ID))
-			c.JSON(http.StatusCreated, gin.H{"status" : http.StatusCreated, "message" : "User created successfully!", "featureteam_id": res.ID})
+			c.JSON(http.StatusCreated, gin.H{
+				"status" : http.StatusCreated,
+				"message" : "User created successfully!",
+				"Location": fmt.Sprintf("/v1/teams/%v", res.ID),
+				"featureteam_id": res.ID,
+			})
 		}
 	}
 

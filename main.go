@@ -60,7 +60,7 @@ func main() {
 		membership.POST("/:user-id", controllers.CreateMembership)
 	}
 
-	router.Run()
+	router.Run(":8090")
 
 
 	//router := mux.NewRouter().StrictSlash(true)

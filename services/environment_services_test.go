@@ -80,7 +80,7 @@ func TestGiveAccessTo(t *testing.T) {
 	db.Model(&models.EnvironmentAccess{}).Count(&countBefore)
 
 	// act
-	result, err := GiveAccessTo(env, *testData.User)
+	result, err := GiveAccessTo(*env, *testData.User)
 
 	// assert
 	assert.NotNil(t, result)
@@ -300,8 +300,8 @@ func TestListSshPublicKeyForEnv(t *testing.T) {
 		panic("db error")
 	}
 	env, _ := CreateEnvironment(envName)
-	GiveAccessTo(env, *user1)
-	GiveAccessTo(env, *user2)
+	GiveAccessTo(*env, *user1)
+	GiveAccessTo(*env, *user2)
 
 	// act
 	res, err := ListSshPublicKeyForEnv(envName)
