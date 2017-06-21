@@ -41,14 +41,14 @@ func GetEnvironmentAccess(c *gin.Context) {
 		return
 	}
 
-	if (len(environmentAccesses.List) == 0) {
+	if (len(*environmentAccesses) == 0) {
 		// choice : if no environment found, return a HTTP status code 200 with an empty array
 		_environmentAccesses = make([]models.TransformedEnvironmentAccess, 0)
 	}
 
 	//transforms for building a good response
-	for i := 0; i < len(environmentAccesses.List); i++ {
-		tmp := models.TransformEnvironmentAccess(environmentAccesses.List[i])
+	for i := 0; i < len(*environmentAccesses); i++ {
+		tmp := models.TransformEnvironmentAccess((*environmentAccesses)[i])
 		_environmentAccesses = append(_environmentAccesses, *tmp)
 	}
 	c.JSON(http.StatusOK, _environmentAccesses)

@@ -1,25 +1,26 @@
 package models
 
 import (
-	"arc-api/gorm_custom"
+	"time"
 )
 
 type EnvironmentAccess struct {
-	gorm_custom.GormModelCustom
+	UserID        uint `gorm:"primary_key"`
+	EnvironmentID uint `gorm:"primary_key"`
+	CreatedAt     *time.Time `json:"-" yaml:"-"`
+	UpdatedAt     *time.Time `json:"-" yaml:"-"`
+	DeletedAt     *time.Time `sql:"index" json:"-" yaml:"-"`
 
-	User       User `gorm:"ForeignKey:UserID"`
-	UserID     uint
+	User          User `gorm:"ForeignKey:UserID"`
 	Environment   Environment `gorm:"ForeignKey:EnvironmentID"`
-	EnvironmentID uint
 }
 
 type TransformedEnvironmentAccess struct {
-	ID                     uint `json:"id"`
-
-	TransformedUser     TransformedUser `json:"user" yaml:"user"`
-	UserID              uint        `json:"user_id" yaml:"user_id"`
-	TransformedEnvironment TransformedEnvironment `json:"environment" yaml:"environment"`
+	UserID                 uint `json:"user_id" yaml:"user_id"`
 	EnvironmentID          uint `json:"environment_id" yaml:"environment_id"`
+
+	TransformedUser        TransformedUser `json:"user" yaml:"user"`
+	TransformedEnvironment TransformedEnvironment `json:"environment" yaml:"environment"`
 }
 
 func (envAccess EnvironmentAccess) IsValid() bool {
@@ -31,7 +32,6 @@ func (envAccess EnvironmentAccess) IsValid() bool {
 
 func TransformEnvironmentAccess(envAccess EnvironmentAccess) *TransformedEnvironmentAccess {
 	return &TransformedEnvironmentAccess{
-		ID: envAccess.ID,
 		TransformedUser: *TransformUser(envAccess.User),
 		UserID: envAccess.UserID,
 		TransformedEnvironment: *TransformEnvironment(envAccess.Environment),

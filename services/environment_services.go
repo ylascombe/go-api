@@ -74,7 +74,8 @@ func AddEnvironmentAccess(userID uint, envName string) error {
 		EnvironmentID: environment.ID,
 		Environment: *environment,
 		UserID: userID,
-		User: *user}
+		User: *user,
+		}
 	_, err = CreateEnvironmentAccess(&environmentAccess)
 
 	if err != nil {
@@ -83,10 +84,9 @@ func AddEnvironmentAccess(userID uint, envName string) error {
 	return nil
 }
 
-func ListAccessForEnvironment(envName string) (*models.EnvironmentAccesses, error) {
+func ListAccessForEnvironment(envName string) (*[]models.EnvironmentAccess, error) {
 
-	array := []models.EnvironmentAccess{}
-	envAccesses := models.EnvironmentAccesses{List: array}
+	var envAccesses []models.EnvironmentAccess
 
 	db := database.NewDBDriver()
 	defer db.Close()
@@ -97,7 +97,7 @@ func ListAccessForEnvironment(envName string) (*models.EnvironmentAccesses, erro
 		return nil, err
 	}
 
-	err = db.Model(environment).Related(&envAccesses.List).Error
+	err = db.Model(*environment).Related(&envAccesses).Error
 
 	if err != nil {
 		return nil, err
@@ -105,25 +105,25 @@ func ListAccessForEnvironment(envName string) (*models.EnvironmentAccesses, erro
 
 	// load "manually" each item in list
 	// TODO manage better error
-	for i := 0; i< len(envAccesses.List); i++ {
+	for i := 0; i< len(envAccesses); i++ {
 
 		var user models.User
 
-		err = db.First(&user, envAccesses.List[i].UserID).Error
+		err = db.First(&user, envAccesses[i].UserID).Error
 
 		if err != nil {
 			return nil, err
 		}
 
-		envAccesses.List[i].User = user
+		envAccesses[i].User = user
 
 		var env models.Environment
-		err = db.First(&env, envAccesses.List[i].EnvironmentID).Error
+		err = db.First(&env, envAccesses[i].EnvironmentID).Error
 
 		if err != nil {
 			return nil, err
 		}
-		envAccesses.List[i].Environment = env
+		envAccesses[i].Environment = env
 	}
 
 	return &envAccesses, nil

@@ -258,7 +258,7 @@ func TestListAccessForEnvironmentWhenEmpty(t *testing.T) {
 	// assert
 	assert.Nil(t, err)
 	assert.NotNil(t, res)
-	assert.Equal(t, 0, len(res.List))
+	assert.Equal(t, 0, len(*res))
 
 	tearDown(t)
 }
@@ -275,21 +275,55 @@ func TestListAccessForEnvironmentWhenOne(t *testing.T) {
 	// assert
 	assert.Nil(t, err)
 	assert.NotNil(t, res)
-	assert.Equal(t, 1, len(res.List))
+	assert.Equal(t, 1, len(*res))
 
-	assert.NotNil(t, envName, res.List[0].Environment)
-	assert.Equal(t, envName, res.List[0].Environment.Name)
-	assert.NotNil(t, res.List[0].EnvironmentID)
-	assert.NotNil(t, res.List[0].User)
-	assert.Equal(t, email, res.List[0].User.Email)
-	assert.Equal(t, firstName, res.List[0].User.Firstname)
-	assert.Equal(t, lastName, res.List[0].User.Lastname)
-	assert.Equal(t, sshPubKey, res.List[0].User.SshPublicKey)
-	assert.Equal(t, pseudo, res.List[0].User.Pseudo)
+	assert.NotNil(t, envName, (*res)[0].Environment)
+	assert.Equal(t, envName, (*res)[0].Environment.Name)
+	assert.NotNil(t, (*res)[0].EnvironmentID)
+	assert.NotNil(t, (*res)[0].User)
+	assert.Equal(t, email, (*res)[0].User.Email)
+	assert.Equal(t, firstName, (*res)[0].User.Firstname)
+	assert.Equal(t, lastName, (*res)[0].User.Lastname)
+	assert.Equal(t, sshPubKey, (*res)[0].User.SshPublicKey)
+	assert.Equal(t, pseudo, (*res)[0].User.Pseudo)
 	tearDown(t)
 }
 
+func TestListAccessForEnvironmentWhenOthers(t *testing.T) {
+
+	tearDown(t)
+
+	// arrange
+	otherEnv := "INEXIST"
+	testData := setUp(t)
+	CreateEnvironment(envName)
+	CreateEnvironment(otherEnv)
+	AddEnvironmentAccess(testData.User.ID, envName)
+	AddEnvironmentAccess(testData.User.ID, otherEnv)
+
+	// act
+	res, err := ListAccessForEnvironment(envName)
+
+	// assert
+	assert.Nil(t, err)
+	assert.NotNil(t, res)
+	assert.Equal(t, 1, len(*res))
+
+	assert.NotNil(t, (*res)[0])
+	assert.NotNil(t, envName, (*res)[0].Environment)
+	assert.Equal(t, envName, (*res)[0].Environment.Name)
+	assert.NotNil(t, (*res)[0].EnvironmentID)
+	assert.NotNil(t, (*res)[0].User)
+	assert.Equal(t, email, (*res)[0].User.Email)
+	assert.Equal(t, firstName, (*res)[0].User.Firstname)
+	assert.Equal(t, lastName, (*res)[0].User.Lastname)
+	assert.Equal(t, sshPubKey, (*res)[0].User.SshPublicKey)
+	assert.Equal(t, pseudo, (*res)[0].User.Pseudo)
+	//tearDown(t)
+}
+
 func TestListSshPublicKeyForEnv(t *testing.T) {
+	tearDown(t)
 	// arrange
 	user1, err := CreateUserFromFields("one", "plus", "oplus", "one@corp.com","ssh-id-rsa num1")
 	if err != nil {
