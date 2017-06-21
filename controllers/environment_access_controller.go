@@ -59,6 +59,10 @@ func CreateEnvironmentAccess(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "message" : "Error while creating environment access", "error detail": err})
 	} else {
-		c.JSON(http.StatusCreated, gin.H{"status" : http.StatusCreated, "message" : "Environment access created successfully!", "env_name": envName})
+		c.JSON(http.StatusCreated, gin.H{
+			"status" : http.StatusCreated,
+			"message" : "Environment access created successfully!",
+			"name": envName,
+		})
 	}
 }

@@ -63,8 +63,8 @@ func CreateEnvironment(c *gin.Context) {
 		c.JSON(http.StatusCreated, gin.H{
 			"status" : http.StatusCreated,
 			"message" : "Environment created successfully!",
-			"env_name": envName,
-			"env_id": environment.ID,
+			"name": envName,
+			"id": environment.ID,
 			"Location": fmt.Sprintf("/v1/environments/%s", environment.Name),
 		})
 	}
