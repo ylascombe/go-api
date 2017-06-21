@@ -33,9 +33,15 @@ func CreateFeatureTeam(featureTeam models.FeatureTeam) (*models.FeatureTeam, err
 
 	if err != nil {
 		return nil, err
-	}
+	} else {
+		res, err := GetFeatureTeamFromName(featureTeam.Name)
 
-	return &featureTeam, nil
+		if err == nil {
+			return res, nil
+		} else {
+			return nil, err
+		}
+	}
 }
 
 

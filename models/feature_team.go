@@ -28,13 +28,13 @@ func (featureTeam FeatureTeam) IsValid() bool {
 		featureTeam.GitlabUrl != ""
 }
 
-func NewFeatureTeam(name string) (*FeatureTeam, error) {
-	featureTeam := FeatureTeam{Name: name}
+func NewFeatureTeam(name string, gitlabUrl string, groupId string) (*FeatureTeam, error) {
+	featureTeam := FeatureTeam{Name: name, GitlabUrl: gitlabUrl, GroupId: groupId}
 
 	if featureTeam.IsValid() {
 		return &featureTeam, nil
 	} else {
-		return nil, errors.New("Name is empty")
+		return nil, errors.New("Name, GitlabUrl, or GroupId is empty")
 	}
 }
 

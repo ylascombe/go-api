@@ -12,7 +12,7 @@ func TestCreateMembership(t *testing.T) {
 
 	tearDownMembership(t)
 	// arrange
-	featureTeam, _ := models.NewFeatureTeam(ftName)
+	featureTeam, _ := models.NewFeatureTeam(ftName, gitlabUrl, groupId)
 	CreateFeatureTeam(*featureTeam)
 	featureTeam, _ = GetFeatureTeamFromName(ftName)
 
@@ -44,7 +44,7 @@ func TestListTeamsMembersInexistantTeam(t *testing.T) {
 
 func TestListTeamsMembersEmptyList(t *testing.T) {
 	// arrange
-	featureTeam, _ := models.NewFeatureTeam(ftName)
+	featureTeam, _ := models.NewFeatureTeam(ftName, gitlabUrl, groupId)
 	CreateFeatureTeam(*featureTeam)
 
 	// act
@@ -64,7 +64,7 @@ func TestListTeamsMembersWhenNotEmpty(t *testing.T) {
 	tearDownMembership(t)
 
 	// arrange
-	featureTeam, _ := models.NewFeatureTeam(ftName)
+	featureTeam, _ := models.NewFeatureTeam(ftName, gitlabUrl, groupId)
 	CreateFeatureTeam(*featureTeam)
 
 	// request it to avoid to create again feature team
@@ -90,7 +90,7 @@ func TestListTeamsMembersWhenNotEmpty(t *testing.T) {
 
 func TestCreateMembershipFromIDs(t *testing.T) {
 	// arrange
-	featureTeam, _ := models.NewFeatureTeam(ftName)
+	featureTeam, _ := models.NewFeatureTeam(ftName, gitlabUrl, groupId)
 	CreateFeatureTeam(*featureTeam)
 	CreateApiUser(firstName, lastName, pseudo, email, sshPubKey)
 
@@ -110,7 +110,7 @@ func TestCreateMembershipFromIDs(t *testing.T) {
 
 func TestCreateMembershipAlreadyExists(t *testing.T) {
 	// arrange
-	featureTeam, _ := models.NewFeatureTeam(ftName)
+	featureTeam, _ := models.NewFeatureTeam(ftName, gitlabUrl, groupId)
 	CreateFeatureTeam(*featureTeam)
 	CreateApiUser(firstName, lastName, pseudo, email, sshPubKey)
 

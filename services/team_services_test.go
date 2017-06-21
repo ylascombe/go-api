@@ -10,14 +10,17 @@ import (
 
 var (
 	ftName = "ftref"
+	gitlabUrl = "http://gitlab.url/ftref"
+	groupId = "fr.laposte.colis.ftref"
 )
 
 func TestCreateFeatureTeam(t *testing.T) {
+
 	// arrange
 	var countBefore int
 	var countAfter int
 
-	featureTeam := models.FeatureTeam{Name: ftName}
+	featureTeam := models.FeatureTeam{Name: ftName, GitlabUrl: gitlabUrl, GroupId: groupId}
 
 	db := database.NewDBDriver()
 	defer db.Close()
@@ -28,6 +31,8 @@ func TestCreateFeatureTeam(t *testing.T) {
 
 	// assert
 	db.Model(&models.FeatureTeam{}).Count(&countAfter)
+
+
 
 	assert.Nil(t, err)
 	assert.NotNil(t, resultFT)
@@ -51,7 +56,7 @@ func TestListFeatureTeamsWhenNone(t *testing.T) {
 
 func TestListFeatureTeamsWhenOne(t *testing.T) {
 	// arrange
-	featureTeam := models.FeatureTeam{Name: ftName}
+	featureTeam := models.FeatureTeam{Name: ftName, GitlabUrl: gitlabUrl, GroupId: groupId}
 	CreateFeatureTeam(featureTeam)
 
 	// act
@@ -80,7 +85,7 @@ func TestGetFeatureTeamWhenAbsent(t *testing.T) {
 func TestGetFeatureTeamWhenPresent(t *testing.T) {
 
 	// arrange
-	featureTeam := models.FeatureTeam{Name: ftName}
+	featureTeam := models.FeatureTeam{Name: ftName, GitlabUrl: gitlabUrl, GroupId: groupId}
 	CreateFeatureTeam(featureTeam)
 	list, _ := ListFeatureTeams()
 
@@ -101,7 +106,7 @@ func TestGetFeatureTeamWhenPresent(t *testing.T) {
 func TestGetFeatureTeamFromNameWhenExist(t *testing.T) {
 
 	// arrange
-	featureTeam := models.FeatureTeam{Name: ftName}
+	featureTeam := models.FeatureTeam{Name: ftName, GitlabUrl: gitlabUrl, GroupId: groupId}
 	CreateFeatureTeam(featureTeam)
 
 	// act
