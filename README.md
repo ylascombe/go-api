@@ -84,14 +84,13 @@ Utilisation des verbes HTTP pour indiquer l'action :
 * PUT : utilisé systématiquement pour réaliser une mise à jour totale d’une instance de la collection (tous les attributs sont remplacés et ceux qui sont non présents seront supprimés) **OU** création si l'identifiant est fourni
 * DELETE : suppression d'un élément
 
------------|---------------------|----------------------------------|--------------------------------------------|
-Verbe HTTP | Correspondance CRUD | Collection : /orders             | Instance : /orders/{id}                    |
------------|---------------------|----------------------------------|--------------------------------------------|
-GET 	   | READ 	             | Read a list orders. 200 OK. 	    | Read the detail of a single order. 200 OK. |
-POST 	   | CREATE 	         | Create a new order. 201 Created. |                                            |
-PUT 	   | UPDATE/CREATE 	 	 | Full Update. 200 OK.             | Create a specific order. 201 Created.      |
-PATCH 	   | UPDATE              |                                  | Partial Update. 200 OK.                    |
-DELETE 	   | DELETE              |                                  | Delete order. 200 OK.                      |
+| Verbe HTTP | Correspondance CRUD | Collection : /orders             | Instance : /orders/{id}                    |
+|------------|---------------------|----------------------------------|--------------------------------------------|
+| GET        | READ 	           | Read a list orders. 200 OK. 	  | Read the detail of a single order. 200 OK. |
+| POST   	 | CREATE 	           | Create a new order. 201 Created. |                                            |
+| PUT   	 | UPDATE/CREATE 	   | Full Update. 200 OK.             | Create a specific order. 201 Created.      |
+| PATCH 	 | UPDATE              |                                  | Partial Update. 200 OK.                    |
+| DELETE 	 | DELETE              |                                  | Delete order. 200 OK.                      |
 
 
 ## Pluriel vs singulier
