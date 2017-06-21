@@ -4,8 +4,8 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"fmt"
-	"github.com/ylascombe/go-api/database"
-	"github.com/ylascombe/go-api/models"
+	"arc-api/database"
+	"arc-api/models"
 )
 
 func TestCreateMembership(t *testing.T) {

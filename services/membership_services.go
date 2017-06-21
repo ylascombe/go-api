@@ -1,10 +1,10 @@
 package services
 
 import (
-	"github.com/ylascombe/go-api/models"
+	"arc-api/models"
 	"errors"
 	"fmt"
-	"github.com/ylascombe/go-api/database"
+	"arc-api/database"
 )
 
 func CreateMembership(apiUser models.ApiUser, team models.FeatureTeam) (*models.Membership, error) {

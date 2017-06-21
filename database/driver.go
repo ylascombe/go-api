@@ -3,7 +3,7 @@ package database
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/ylascombe/go-api/models"
+	"arc-api/models"
 )
 
 type Driver struct {

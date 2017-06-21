@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/ylascombe/go-api/gorm_custom"
+	"arc-api/gorm_custom"
 )
 
 type EnvironmentAccess struct {

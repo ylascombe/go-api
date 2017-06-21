@@ -3,8 +3,8 @@ package services
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"github.com/ylascombe/go-api/database"
-	"github.com/ylascombe/go-api/models"
+	"arc-api/database"
+	"arc-api/models"
 	"fmt"
 )
 

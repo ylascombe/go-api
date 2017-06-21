@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/ylascombe/go-api/controllers"
-	"github.com/ylascombe/go-api/database"
+	"arc-api/controllers"
+	"arc-api/database"
 	"github.com/itsjamie/gin-cors"
 	"github.com/gin-gonic/gin"
 	"time"

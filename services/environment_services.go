@@ -2,8 +2,8 @@ package services
 
 import (
 	"errors"
-	"github.com/ylascombe/go-api/database"
-	"github.com/ylascombe/go-api/models"
+	"arc-api/database"
+	"arc-api/models"
 	"fmt"
 	"bytes"
 )

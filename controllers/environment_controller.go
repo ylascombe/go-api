@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"net/http"
-	"github.com/ylascombe/go-api/services"
-	"github.com/ylascombe/go-api/models"
+	"arc-api/services"
+	"arc-api/models"
 	"github.com/gin-gonic/gin"
 	"fmt"
 )

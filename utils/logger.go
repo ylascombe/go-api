@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"github.com/ylascombe/go-api/config"
+	"arc-api/config"
 	"log"
 	"os"
 	"os/exec"

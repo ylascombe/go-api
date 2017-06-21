@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/ylascombe/go-api/models"
+	"arc-api/models"
 	"testing"
 )
 
