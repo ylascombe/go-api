@@ -16,11 +16,11 @@ func TestCreateMembership(t *testing.T) {
 	CreateFeatureTeam(*featureTeam)
 	featureTeam, _ = GetFeatureTeamFromName(ftName)
 
-	CreateApiUser(firstName, lastName, pseudo, email, sshPubKey)
-	apiUser, _ := GetApiUserFromMail(email)
+	CreateUserFromFields(firstName, lastName, pseudo, email, sshPubKey)
+	user, _ := GetUserFromMail(email)
 
 	// act
-	membership, err := CreateMembership(*apiUser, *featureTeam)
+	membership, err := CreateMembership(*user, *featureTeam)
 
 	// assert
 	assert.Nil(t, err)
@@ -70,9 +70,9 @@ func TestListTeamsMembersWhenNotEmpty(t *testing.T) {
 	// request it to avoid to create again feature team
 	featureTeam, _ = GetFeatureTeamFromName(ftName)
 
-	apiUser, _ := CreateApiUser(firstName, lastName, pseudo, email, sshPubKey)
+	user, _ := CreateUserFromFields(firstName, lastName, pseudo, email, sshPubKey)
 
-	CreateMembership(*apiUser, *featureTeam)
+	CreateMembership(*user, *featureTeam)
 
 	// act
 	res, err := ListTeamMembers(ftName)
@@ -82,7 +82,7 @@ func TestListTeamsMembersWhenNotEmpty(t *testing.T) {
 	assert.NotNil(t, res)
 	assert.Equal(t, 1, len(res.List))
 	assert.Equal(t, ftName, res.List[0].FeatureTeam.Name)
-	assert.Equal(t, pseudo, res.List[0].ApiUser.Pseudo)
+	assert.Equal(t, pseudo, res.List[0].User.Pseudo)
 
 	//clean
 	tearDownMembership(t)
@@ -92,13 +92,13 @@ func TestCreateMembershipFromIDs(t *testing.T) {
 	// arrange
 	featureTeam, _ := models.NewFeatureTeam(ftName, gitlabUrl, groupId)
 	CreateFeatureTeam(*featureTeam)
-	CreateApiUser(firstName, lastName, pseudo, email, sshPubKey)
+	CreateUserFromFields(firstName, lastName, pseudo, email, sshPubKey)
 
 	featureTeam, _ = GetFeatureTeamFromName(ftName)
-	apiUser, _ := GetApiUserFromMail(email)
+	user, _ := GetUserFromMail(email)
 
 	// act
-	membership, err := CreateMembershipFromIDs(apiUser.ID, featureTeam.ID)
+	membership, err := CreateMembershipFromIDs(user.ID, featureTeam.ID)
 
 	// assert
 	assert.Nil(t, err)
@@ -112,16 +112,16 @@ func TestCreateMembershipAlreadyExists(t *testing.T) {
 	// arrange
 	featureTeam, _ := models.NewFeatureTeam(ftName, gitlabUrl, groupId)
 	CreateFeatureTeam(*featureTeam)
-	CreateApiUser(firstName, lastName, pseudo, email, sshPubKey)
+	CreateUserFromFields(firstName, lastName, pseudo, email, sshPubKey)
 
 	featureTeam, _ = GetFeatureTeamFromName(ftName)
-	apiUser, _ := GetApiUserFromMail(email)
+	user, _ := GetUserFromMail(email)
 
 	// create a first time
-	membership, err := CreateMembershipFromIDs(apiUser.ID, featureTeam.ID)
+	membership, err := CreateMembershipFromIDs(user.ID, featureTeam.ID)
 
 	// act
-	membership, err = CreateMembershipFromIDs(apiUser.ID, featureTeam.ID)
+	membership, err = CreateMembershipFromIDs(user.ID, featureTeam.ID)
 
 	// assert
 	assert.NotNil(t, err)
@@ -140,11 +140,11 @@ func tearDownMembership(t *testing.T) {
 
 	res2 := db.Exec("delete from memberships").Error
 	res1 := db.Exec("delete from feature_teams").Error
-	res3 := db.Exec("delete from api_users").Error
+	res3 := db.Exec("delete from users").Error
 
 	if res1 != nil || res2 != nil {
 		panic(fmt.Sprintf(
-			"db error: feature_teams=%s memberships=%s api_users=%s",
+			"db error: feature_teams=%s memberships=%s users=%s",
 			res1, res2, res3))
 	}
 }

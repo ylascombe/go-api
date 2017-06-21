@@ -37,9 +37,9 @@ func CreateEnvironment(name string) (*models.Environment, error) {
 	}
 }
 
-func GiveAccessTo(env models.Environment, user models.ApiUser) (*models.EnvironmentAccess, error) {
+func GiveAccessTo(env models.Environment, user models.User) (*models.EnvironmentAccess, error) {
 
-	envAccess := models.EnvironmentAccess{ApiUser: user, ApiUserID:user.ID, Environment: env, EnvironmentID: env.ID}
+	envAccess := models.EnvironmentAccess{User: user, UserID:user.ID, Environment: env, EnvironmentID: env.ID}
 
 	return CreateEnvironmentAccess(&envAccess)
 }
@@ -64,7 +64,7 @@ func AddEnvironmentAccess(userID uint, envName string) error {
 		return err
 	}
 
-	apiUser, err := GetApiUser(userID)
+	user, err := GetUser(userID)
 
 	if err != nil {
 		return err
@@ -73,8 +73,8 @@ func AddEnvironmentAccess(userID uint, envName string) error {
 	environmentAccess := models.EnvironmentAccess{
 		EnvironmentID: environment.ID,
 		Environment: *environment,
-		ApiUserID: userID,
-		ApiUser: *apiUser}
+		UserID: userID,
+		User: *user}
 	_, err = CreateEnvironmentAccess(&environmentAccess)
 
 	if err != nil {
@@ -107,15 +107,15 @@ func ListAccessForEnvironment(envName string) (*models.EnvironmentAccesses, erro
 	// TODO manage better error
 	for i := 0; i< len(envAccesses.List); i++ {
 
-		var apiUser models.ApiUser
+		var user models.User
 
-		err = db.First(&apiUser, envAccesses.List[i].ApiUserID).Error
+		err = db.First(&user, envAccesses.List[i].UserID).Error
 
 		if err != nil {
 			return nil, err
 		}
 
-		envAccesses.List[i].ApiUser = apiUser
+		envAccesses.List[i].User = user
 
 		var env models.Environment
 		err = db.First(&env, envAccesses.List[i].EnvironmentID).Error
@@ -197,7 +197,7 @@ func ListSshPublicKeyForEnv(envName string) (*string, error) {
 
 	for i:=0; i< len(envAccesses); i++ {
 
-		user, err := GetApiUser(envAccesses[i].ApiUserID)
+		user, err := GetUser(envAccesses[i].UserID)
 
 		if err != nil {
 			return nil, err

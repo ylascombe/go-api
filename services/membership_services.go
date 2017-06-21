@@ -7,17 +7,17 @@ import (
 	"arc-api/database"
 )
 
-func CreateMembership(apiUser models.ApiUser, team models.FeatureTeam) (*models.Membership, error) {
+func CreateMembership(user models.User, team models.FeatureTeam) (*models.Membership, error) {
 
-	if ! apiUser.IsValid() {
-		return nil, errors.New(fmt.Sprintf("ApiUser should be initialized. Got: %s", apiUser))
+	if ! user.IsValid() {
+		return nil, errors.New(fmt.Sprintf("User should be initialized. Got: %s", user))
 	}
 
 	if ! team.IsValid() {
 		return nil, errors.New(fmt.Sprintf("FeatureTeam should be initialized. Got: %s", team))
 	}
 
-	membership, err := models.NewMembership(apiUser, team)
+	membership, err := models.NewMembership(user, team)
 
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func CreateMembership(apiUser models.ApiUser, team models.FeatureTeam) (*models.
 	if err != nil {
 		return nil, err
 	} else {
-		res, err := GetMembership(apiUser.ID, team.ID)
+		res, err := GetMembership(user.ID, team.ID)
 		if err == nil {
 			return res, nil
 		} else {
@@ -40,8 +40,8 @@ func CreateMembership(apiUser models.ApiUser, team models.FeatureTeam) (*models.
 	}
 }
 
-func CreateMembershipFromIDs(apiUserID uint, featureTeamID uint) (*models.Membership, error) {
-	membership := models.Membership{FeatureTeamID: featureTeamID, ApiUserID: apiUserID}
+func CreateMembershipFromIDs(userID uint, featureTeamID uint) (*models.Membership, error) {
+	membership := models.Membership{FeatureTeamID: featureTeamID, UserID: userID}
 
 	db := database.NewDBDriver()
 	defer db.Close()
@@ -85,24 +85,24 @@ func ListTeamMembers(featureTeamName string) (*models.Memberships, error) {
 	// TODO improve error management
 	for i := 0; i< len(memberships.List); i++ {
 
-		var apiUser models.ApiUser
-		err = db.First(&apiUser, memberships.List[i].ApiUserID).Error
+		var user models.User
+		err = db.First(&user, memberships.List[i].UserID).Error
 
 		if err != nil {
 			return nil, err
 		}
-		memberships.List[i].ApiUser = apiUser
+		memberships.List[i].User = user
 		memberships.List[i].FeatureTeam = *featureTeam
 	}
 
 	return &memberships, nil
 }
 
-func GetMembership(apiUserId uint, featureTeamId uint) (*models.Membership, error) {
+func GetMembership(userId uint, featureTeamId uint) (*models.Membership, error) {
 	db := database.NewDBDriver()
 	defer db.Close()
 
-	membership := models.Membership{ApiUserID: apiUserId, FeatureTeamID: featureTeamId}
+	membership := models.Membership{UserID: userId, FeatureTeamID: featureTeamId}
 
 	err := db.First(&membership).Error
 

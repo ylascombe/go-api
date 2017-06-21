@@ -9,10 +9,10 @@ import (
 )
 
 func FetchAllUsers(c *gin.Context) {
-	var users *models.ApiUsers
-	var _users []models.TransformedApiUser
+	var users *models.Users
+	var _users []models.TransformedUser
 
-	users, err := services.ListApiUser()
+	users, err := services.ListUser()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "error message" : err})
@@ -21,19 +21,19 @@ func FetchAllUsers(c *gin.Context) {
 
 	if (len(users.List) <= 0) {
 		// choice : if no user found, return a HTTP status code 200 with an empty array
-		_users = make([]models.TransformedApiUser, 0)
+		_users = make([]models.TransformedUser, 0)
 	}
 
 	//transforms the users
 	for _, item := range users.List {
-		_users = append(_users, *models.TransformApiUser(item))
+		_users = append(_users, *models.TransformUser(item))
 	}
 	c.JSON(http.StatusOK, _users)
 }
 
 func CreateUser(c *gin.Context) {
 
-	var json models.ApiUser
+	var json models.User
 
 	err := c.BindJSON(&json)
 	if err != nil {

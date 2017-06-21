@@ -5,7 +5,7 @@ import (
 	"errors"
 )
 
-type ApiUser struct {
+type User struct {
 	gorm_custom.GormModelCustom
 
 	Firstname    string `json:"firstname" yaml:"firstname"`
@@ -15,7 +15,7 @@ type ApiUser struct {
 	Pseudo       string `json:"pseudo" yaml:"pseudo"`
 }
 
-type TransformedApiUser struct {
+type TransformedUser struct {
 	ID        uint      `yaml:"ID" json:"ID"`
 
 	Firstname    string `json:"firstname" yaml:"firstname"`
@@ -25,31 +25,31 @@ type TransformedApiUser struct {
 	Pseudo       string `json:"pseudo" yaml:"pseudo"`
 }
 
-func NewApiUser(firstname string, lastname string, pseudo string, email string, sshPublicKey string) (*ApiUser, error) {
-	apiUser := ApiUser{Firstname: firstname, Lastname: lastname, Email: email, Pseudo: pseudo, SshPublicKey: sshPublicKey}
+func NewUser(firstname string, lastname string, pseudo string, email string, sshPublicKey string) (*User, error) {
+	user := User{Firstname: firstname, Lastname: lastname, Email: email, Pseudo: pseudo, SshPublicKey: sshPublicKey}
 
-	if apiUser.IsValid() {
-		return &apiUser, nil
+	if user.IsValid() {
+		return &user, nil
 	} else {
 		return nil, errors.New("Given parameters are missing or invalid")
 	}
 }
 
-func (apiUser ApiUser) IsValid() bool {
-	return ApiUser{} != apiUser &&
-		apiUser.Email != "" &&
-		apiUser.Lastname != "" &&
-		apiUser.Firstname != "" &&
-		apiUser.Pseudo != ""
+func (user User) IsValid() bool {
+	return User{} != user &&
+		user.Email != "" &&
+		user.Lastname != "" &&
+		user.Firstname != "" &&
+		user.Pseudo != ""
 }
 
-func TransformApiUser(apiUser ApiUser) *TransformedApiUser {
-	return &TransformedApiUser{
-		ID: apiUser.ID,
-		Firstname: apiUser.Firstname,
-		Lastname: apiUser.Lastname,
-		Email: apiUser.Email,
-		SshPublicKey: apiUser.SshPublicKey,
-		Pseudo: apiUser.Pseudo,
+func TransformUser(user User) *TransformedUser {
+	return &TransformedUser{
+		ID: user.ID,
+		Firstname: user.Firstname,
+		Lastname: user.Lastname,
+		Email: user.Email,
+		SshPublicKey: user.SshPublicKey,
+		Pseudo: user.Pseudo,
 	}
 }

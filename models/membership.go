@@ -7,37 +7,37 @@ import (
 
 type Membership struct {
 	// specify manually ID since it is a composed key
-	ApiUserID     uint `gorm:"primary_key"`
+	UserID     uint `gorm:"primary_key"`
 	FeatureTeamID uint `gorm:"primary_key"`
 	CreatedAt     *time.Time `json:"-" yaml:"-"`
 	UpdatedAt     *time.Time `json:"-" yaml:"-"`
 	DeletedAt     *time.Time `sql:"index" json:"-" yaml:"-"`
 
-	ApiUser       ApiUser `gorm:"ForeignKey:ApiUserID"`
+	User       User `gorm:"ForeignKey:UserID"`
 	FeatureTeam   FeatureTeam `gorm:"ForeignKey:FeatureTeamID"`
 }
 
 type TransformedMembership struct {
-	ApiUserID     uint `json:"api_user_id" yaml:"api_user_id"`
-	FeatureTeamID uint `json:"team_id" yaml:"team_id"`
-	CreatedAt     *time.Time `json:"-" yaml:"-"`
-	UpdatedAt     *time.Time `json:"-" yaml:"-"`
-	DeletedAt     *time.Time `json:"-" yaml:"-"`
+	UserID              uint `json:"user_id" yaml:"user_id"`
+	FeatureTeamID          uint `json:"team_id" yaml:"team_id"`
+	CreatedAt              *time.Time `json:"-" yaml:"-"`
+	UpdatedAt              *time.Time `json:"-" yaml:"-"`
+	DeletedAt              *time.Time `json:"-" yaml:"-"`
 
-	TransformedApiUser       TransformedApiUser `json:"api_user" yaml:"api_user"`
-	TransformedFeatureTeam   TransformedFeatureTeam `json:"team" yaml:"team"`
+	TransformedUser     TransformedUser `json:"user" yaml:"user"`
+	TransformedFeatureTeam TransformedFeatureTeam `json:"team" yaml:"team"`
 }
 
 func (membership Membership) IsValid() bool {
-	return membership.ApiUserID != 0 &&
-		membership.ApiUser.ID == membership.ApiUserID &&
+	return membership.UserID != 0 &&
+		membership.User.ID == membership.UserID &&
 		membership.FeatureTeamID != 0 &&
 		membership.FeatureTeam.ID == membership.FeatureTeamID
 }
 
-func NewMembership(apiUser ApiUser, featureTeam FeatureTeam) (*Membership, error) {
-	if apiUser.ID != 0 && featureTeam.ID != 0 {
-		return &Membership{ApiUser: apiUser, ApiUserID: apiUser.ID, FeatureTeam: featureTeam, FeatureTeamID: featureTeam.ID}, nil
+func NewMembership(user User, featureTeam FeatureTeam) (*Membership, error) {
+	if user.ID != 0 && featureTeam.ID != 0 {
+		return &Membership{User: user, UserID: user.ID, FeatureTeam: featureTeam, FeatureTeamID: featureTeam.ID}, nil
 	} else {
 		return nil, errors.New("Invalid parameters when create Membership")
 	}
@@ -45,8 +45,8 @@ func NewMembership(apiUser ApiUser, featureTeam FeatureTeam) (*Membership, error
 
 func TransformMembership(membership Membership) *TransformedMembership {
 	return &TransformedMembership{
-		TransformedApiUser: *TransformApiUser(membership.ApiUser),
-		ApiUserID: membership.ApiUserID,
+		TransformedUser: *TransformUser(membership.User),
+		UserID: membership.UserID,
 		TransformedFeatureTeam: *TransformFeatureTeam(membership.FeatureTeam),
 		FeatureTeamID: membership.FeatureTeamID,
 	}

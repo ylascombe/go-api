@@ -9,7 +9,7 @@ import (
 )
 
 type testData struct {
-	User *models.ApiUser
+	User *models.User
 }
 
 var (
@@ -18,6 +18,7 @@ var (
 
 func TestCreateEnvironment(t *testing.T) {
 
+	tearDown(t)
 	// Arrange
 	setUp(t)
 	db := database.NewDBDriver()
@@ -279,23 +280,23 @@ func TestListAccessForEnvironmentWhenOne(t *testing.T) {
 	assert.NotNil(t, envName, res.List[0].Environment)
 	assert.Equal(t, envName, res.List[0].Environment.Name)
 	assert.NotNil(t, res.List[0].EnvironmentID)
-	assert.NotNil(t, res.List[0].ApiUser)
-	assert.Equal(t, email, res.List[0].ApiUser.Email)
-	assert.Equal(t, firstName, res.List[0].ApiUser.Firstname)
-	assert.Equal(t, lastName, res.List[0].ApiUser.Lastname)
-	assert.Equal(t, sshPubKey, res.List[0].ApiUser.SshPublicKey)
-	assert.Equal(t, pseudo, res.List[0].ApiUser.Pseudo)
+	assert.NotNil(t, res.List[0].User)
+	assert.Equal(t, email, res.List[0].User.Email)
+	assert.Equal(t, firstName, res.List[0].User.Firstname)
+	assert.Equal(t, lastName, res.List[0].User.Lastname)
+	assert.Equal(t, sshPubKey, res.List[0].User.SshPublicKey)
+	assert.Equal(t, pseudo, res.List[0].User.Pseudo)
 	tearDown(t)
 }
 
 func TestListSshPublicKeyForEnv(t *testing.T) {
 	// arrange
-	user1, err := CreateApiUser("one", "plus", "oplus", "one@corp.com","ssh-id-rsa num1")
+	user1, err := CreateUserFromFields("one", "plus", "oplus", "one@corp.com","ssh-id-rsa num1")
 	if err != nil {
 		panic("db error")
 	}
 
-	user2, err := CreateApiUser("two", "bar", "tbar", "two@corp.com", "ssh-id-rsa num2")
+	user2, err := CreateUserFromFields("two", "bar", "tbar", "two@corp.com", "ssh-id-rsa num2")
 	if err != nil {
 		panic("db error")
 	}
@@ -324,23 +325,23 @@ func tearDown(t *testing.T) {
 	defer db.Close()
 	//db.Delete(user)
 	res2 := db.Exec("delete from environment_accesses").Error
-	res1 := db.Exec("delete from api_users").Error
+	res1 := db.Exec("delete from users").Error
 	res3 := db.Exec("delete from environments").Error
 
 	if res1 != nil || res2 != nil || res3 != nil {
 		panic(fmt.Sprintf(
-			"db error: api_users=%s environment_accesses=%s, environments=%s",
+			"db error: users=%s environment_accesses=%s, environments=%s",
 			res1, res2, res3))
 	}
 }
 
 func setUp(t *testing.T) testData {
 
-	user, err := GetApiUserFromMail(email)
+	user, err := GetUserFromMail(email)
 
 	if err != nil {
 		// prerequisites
-		user, err = CreateApiUser(firstName, lastName, pseudo, email, sshPubKey)
+		user, err = CreateUserFromFields(firstName, lastName, pseudo, email, sshPubKey)
 		if err != nil {
 			panic("db error")
 		}

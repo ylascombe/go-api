@@ -22,7 +22,7 @@ func NewDBDriver() *gorm.DB {
 func AutoMigrateDB(db *gorm.DB) {
 
 	// Migrate the schema
-	db.AutoMigrate(&models.ApiUser{})
+	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.Environment{})
 	db.AutoMigrate(&models.EnvironmentAccess{})
 	db.AutoMigrate(&models.FeatureTeam{})

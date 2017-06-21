@@ -6,24 +6,24 @@ import (
 	"fmt"
 )
 
-func ListApiUser() (*models.ApiUsers, error) {
+func ListUser() (*models.Users, error) {
 	db := database.NewDBDriver()
 	defer db.Close()
 
-	var users []models.ApiUser
+	var users []models.User
 	err := db.Find(&users).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	apiUsers := models.ApiUsers{List: users}
-	return &apiUsers, err
+	res := models.Users{List: users}
+	return &res, err
 }
 
-func CreateApiUser(firstName string, lastName string, pseudo string, email string, publicSSHKey string) (*models.ApiUser, error) {
+func CreateUserFromFields(firstName string, lastName string, pseudo string, email string, publicSSHKey string) (*models.User, error) {
 
-	user, err := models.NewApiUser(firstName, lastName, pseudo, email, publicSSHKey)
+	user, err := models.NewUser(firstName, lastName, pseudo, email, publicSSHKey)
 
 	if err != nil || ! user.IsValid() {
 		fmt.Println("user is not valid")
@@ -39,7 +39,7 @@ func CreateApiUser(firstName string, lastName string, pseudo string, email strin
 		return nil, err
 	}
 
-	res, err := GetApiUserFromMail(email)
+	res, err := GetUserFromMail(email)
 
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func CreateApiUser(firstName string, lastName string, pseudo string, email strin
 	}
 }
 
-func CreateUser(user models.ApiUser) (*models.ApiUser, error) {
+func CreateUser(user models.User) (*models.User, error) {
 	db := database.NewDBDriver()
 	defer db.Close()
 
@@ -61,11 +61,11 @@ func CreateUser(user models.ApiUser) (*models.ApiUser, error) {
 	return &user, nil
 }
 
-func GetApiUser(userID uint) (*models.ApiUser, error) {
+func GetUser(userID uint) (*models.User, error) {
 	db := database.NewDBDriver()
 	defer db.Close()
 
-	var user models.ApiUser
+	var user models.User
 	err := db.First(&user, "ID = ?", userID).Error
 
 	if err != nil {
@@ -75,11 +75,11 @@ func GetApiUser(userID uint) (*models.ApiUser, error) {
 	return &user, nil
 }
 
-func GetApiUserFromMail(email string) (*models.ApiUser, error) {
+func GetUserFromMail(email string) (*models.User, error) {
 	db := database.NewDBDriver()
 	defer db.Close()
 
-	var user models.ApiUser
+	var user models.User
 	err := db.First(&user, "Email = ?", email).Error
 
 	if err != nil {
