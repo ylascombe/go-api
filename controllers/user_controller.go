@@ -15,7 +15,10 @@ func FetchAllUsers(c *gin.Context) {
 	users, err := services.ListUser()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "error message" : err})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status" : http.StatusInternalServerError,
+			"error message" : err,
+		})
 		return
 	}
 
@@ -37,12 +40,20 @@ func CreateUser(c *gin.Context) {
 
 	err := c.BindJSON(&json)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status" : http.StatusBadRequest, "message" : "Invalid request.", "error detail": err})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status" : http.StatusBadRequest,
+			"message" : "Invalid request.",
+			"error detail": err,
+		})
 	} else {
 		user, err := services.CreateUser(json)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "message" : "Error while creating user", "error detail": err})
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status" : http.StatusInternalServerError,
+				"message" : "Error while creating user",
+				"error detail": err,
+			})
 		} else {
 			c.JSON(http.StatusCreated, gin.H{
 				"status" : http.StatusCreated,

@@ -40,12 +40,18 @@ func GetEnvironment(c *gin.Context) {
 	environment, err := services.GetEnvironmentByName(envName)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "data" : ""})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status" : http.StatusInternalServerError,
+			"data" : "",
+		})
 		return
 	}
 
 	if (environment.ID == 0) {
-		c.JSON(http.StatusNotFound, gin.H{"status" : http.StatusNotFound, "message" : "No environment found!"})
+		c.JSON(http.StatusNotFound, gin.H{
+			"status" : http.StatusNotFound,
+			"message" : "No environment found!",
+		})
 		return
 	}
 
@@ -58,7 +64,11 @@ func CreateEnvironment(c *gin.Context) {
 	environment, err := services.CreateEnvironment(envName)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "message" : "Error while creating environment", "error detail": err})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status" : http.StatusInternalServerError,
+			"message" : "Error while creating environment",
+			"error detail": err,
+		})
 	} else {
 		c.JSON(http.StatusCreated, gin.H{
 			"status" : http.StatusCreated,

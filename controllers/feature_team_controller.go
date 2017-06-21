@@ -15,7 +15,10 @@ func FetchAllFeatureTeams(c *gin.Context) {
 	teams, err := services.ListFeatureTeams()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "error message" : err})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status" : http.StatusInternalServerError,
+			"error message" : err,
+		})
 		return
 	}
 
@@ -38,7 +41,11 @@ func CreateFeatureTeam(c *gin.Context) {
 
 	err := c.BindJSON(&json)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status" : http.StatusBadRequest, "message" : "Invalid request.", "error detail": err})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status" : http.StatusBadRequest,
+			"message" : "Invalid request.",
+			"error detail": err,
+		})
 	} else {
 		res, err := services.CreateFeatureTeam(json)
 

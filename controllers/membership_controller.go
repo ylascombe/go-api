@@ -18,16 +18,26 @@ func CreateMembership(c *gin.Context) {
 	featureTeam, err := services.GetFeatureTeamFromName(teamName)
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"status" : http.StatusNotFound, "message" : fmt.Sprintf("No feature team name %s found!", teamName)})
+		c.JSON(http.StatusNotFound, gin.H{
+			"status" : http.StatusNotFound,
+			"message" : fmt.Sprintf("No feature team name %s found!", teamName),
+		})
 		return
 	}
 
 	_, err = services.CreateMembershipFromIDs(uintUserID, featureTeam.ID)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "message" : "Error while creating environment access", "error detail": err})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status" : http.StatusInternalServerError,
+			"message" : "Error while creating environment access",
+			"error detail": err,
+		})
 	} else {
-		c.JSON(http.StatusCreated, gin.H{"status" : http.StatusCreated, "message" : fmt.Sprintf("User %s has been added to team %s!", userID, teamName)})
+		c.JSON(http.StatusCreated, gin.H{
+			"status" : http.StatusCreated,
+			"message" : fmt.Sprintf("User %s has been added to team %s!", userID, teamName),
+		})
 		// TODO return location
 	}
 }
@@ -39,7 +49,10 @@ func FetchAllMember(c *gin.Context) {
 	memberships, err := services.ListTeamMembers(teamName)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "error message" : err})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status" : http.StatusInternalServerError,
+			"error message" : err,
+		})
 		return
 	}
 

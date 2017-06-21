@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 func SSHPublicKeysForEnv(c *gin.Context) {
 
 	envName := c.Param("env-name")
@@ -16,12 +15,17 @@ func SSHPublicKeysForEnv(c *gin.Context) {
 	result, err := services.ListSshPublicKeyForEnv(envName)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "error message" : err})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status" : http.StatusInternalServerError,
+			"error message" : err,
+		})
 	} else {
-		c.JSON(http.StatusOK, gin.H{"status" : http.StatusOK, "data" : result})
+		c.JSON(http.StatusOK, gin.H{
+			"status" : http.StatusOK,
+			"data" : result,
+		})
 	}
 }
-
 
 func GetEnvironmentAccess(c *gin.Context) {
 	envName := c.Param("env-name")
@@ -30,7 +34,10 @@ func GetEnvironmentAccess(c *gin.Context) {
 	var _environmentAccesses []models.TransformedEnvironmentAccess
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "error message" : err})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status" : http.StatusInternalServerError,
+			"error message" : err,
+		})
 		return
 	}
 
@@ -40,13 +47,12 @@ func GetEnvironmentAccess(c *gin.Context) {
 	}
 
 	//transforms for building a good response
-	for i:=0; i<len(environmentAccesses.List); i++ {
+	for i := 0; i < len(environmentAccesses.List); i++ {
 		tmp := models.TransformEnvironmentAccess(environmentAccesses.List[i])
 		_environmentAccesses = append(_environmentAccesses, *tmp)
 	}
 	c.JSON(http.StatusOK, _environmentAccesses)
 }
-
 
 func CreateEnvironmentAccess(c *gin.Context) {
 	envName := c.Param("env-name")
@@ -57,7 +63,11 @@ func CreateEnvironmentAccess(c *gin.Context) {
 	err := services.AddEnvironmentAccess(uintUserID, envName)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status" : http.StatusInternalServerError, "message" : "Error while creating environment access", "error detail": err})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status" : http.StatusInternalServerError,
+			"message" : "Error while creating environment access",
+			"error detail": err,
+		})
 	} else {
 		c.JSON(http.StatusCreated, gin.H{
 			"status" : http.StatusCreated,
