@@ -1,96 +1,78 @@
 package controllers
 
 import (
-	"fmt"
-	"github.com/gorilla/mux"
 	"strconv"
-	"encoding/json"
 	"net/http"
-	"github.com/ylascombe/go-api/services"
-	"github.com/ylascombe/go-api/utils"
-	"github.com/ylascombe/go-api/models"
+	"arc-api/services"
+	"arc-api/models"
+	"github.com/gin-gonic/gin"
 )
 
-func EnvironmentAccess(writer http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
-	name := vars["name"]
+func SSHPublicKeysForEnv(c *gin.Context) {
 
-	fmt.Println("Method : ", req.Method)
-	switch req.Method {
-	case "GET":
-		listEnvironmentAccesses(writer, req, name)
+	envName := c.Param("env-name")
 
-	case "PUT":
-		userID := vars["userID"]
-		intUserID, _ := strconv.Atoi(userID)
-		uintUserID := uint(intUserID)
-		fmt.Println("environmentAccess2")
+	result, err := services.ListSshPublicKeyForEnv(envName)
 
-		err := services.AddEnvironmentAccess(uintUserID, name)
-		fmt.Println("environmentAccess3")
-		fmt.Println(err)
-
-		if err == nil {
-			fmt.Println("environmentAccess - 200")
-			writer.WriteHeader(200)
-			return
-		} else {
-			fmt.Println("environmentAccess - 409")
-			writer.WriteHeader(409)
-			resp := ApiResponse{ErrorMessage: string(err.Error())}
-			text := utils.Marshall(resp)
-			fmt.Fprintf(writer, text)
-		}
-	default:
-		fmt.Println("environmentAccess - 404")
-		writer.WriteHeader(404)
-	}
-}
-
-func listEnvironmentAccesses(writer http.ResponseWriter, request *http.Request, name string) {
-	environmentAccesses, err := services.ListAccessForEnvironment(name)
-
-	fmt.Println("name", name)
-	fmt.Println(environmentAccesses)
-	if err == nil {
-		// for YAML Marshalling : text := utils.Marshall(users)
-		text, err := json.Marshal(environmentAccesses)
-
-		if err == nil {
-			writer.WriteHeader(200)
-			fmt.Fprintf(writer, string(text))
-			return
-		}
-	}
-
-	// if this code is executed, so there is an error
-	writer.WriteHeader(500)
-	resp := ApiResponse{ErrorMessage: string(err.Error())}
-	text := utils.Marshall(resp)
-	fmt.Fprintf(writer, text)
-}
-
-func createEnvironmentAccess(writer http.ResponseWriter, request *http.Request) {
-	var envAccess models.EnvironmentAccess
-
-	//readObjectAndCallCreateFunction(envAccess, services.CreateEnvironmentAccess, writer, request)
-	utils.ReadObjectFromJSONInput(&envAccess, writer, request)
-
-	if envAccess.IsValid() {
-		_, err := services.CreateEnvironmentAccess(&envAccess)
-		if err == nil {
-			writer.WriteHeader(200)
-		} else {
-			writer.WriteHeader(409)
-			resp := ApiResponse{ErrorMessage: string(err.Error())}
-			text := utils.Marshall(resp)
-			fmt.Fprintf(writer, text)
-		}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status" : http.StatusInternalServerError,
+			"error message" : err,
+		})
 	} else {
-		writer.WriteHeader(400)
-		resp := ApiResponse{ErrorMessage: "Given parameters are empty or not valid"}
-		text := utils.Marshall(resp)
-		fmt.Fprintf(writer, text)
+		c.JSON(http.StatusOK, gin.H{
+			"status" : http.StatusOK,
+			"data" : result,
+		})
+	}
+}
+
+func GetEnvironmentAccess(c *gin.Context) {
+	envName := c.Param("env-name")
+
+	environmentAccesses, err := services.ListAccessForEnvironment(envName)
+	var _environmentAccesses []models.TransformedEnvironmentAccess
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status" : http.StatusInternalServerError,
+			"error message" : err,
+		})
+		return
 	}
 
+	if (len(*environmentAccesses) == 0) {
+		// choice : if no environment found, return a HTTP status code 200 with an empty array
+		_environmentAccesses = make([]models.TransformedEnvironmentAccess, 0)
+	}
+
+	//transforms for building a good response
+	for i := 0; i < len(*environmentAccesses); i++ {
+		tmp := models.TransformEnvironmentAccess((*environmentAccesses)[i])
+		_environmentAccesses = append(_environmentAccesses, *tmp)
+	}
+	c.JSON(http.StatusOK, _environmentAccesses)
+}
+
+func CreateEnvironmentAccess(c *gin.Context) {
+	envName := c.Param("env-name")
+	userID := c.Param("user-id")
+	intUserID, _ := strconv.Atoi(userID)
+	uintUserID := uint(intUserID)
+
+	err := services.AddEnvironmentAccess(uintUserID, envName)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status" : http.StatusInternalServerError,
+			"message" : "Error while creating environment access",
+			"error detail": err,
+		})
+	} else {
+		c.JSON(http.StatusCreated, gin.H{
+			"status" : http.StatusCreated,
+			"message" : "Environment access created successfully!",
+			"name": envName,
+		})
+	}
 }

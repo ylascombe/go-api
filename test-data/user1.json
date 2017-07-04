@@ -1,5 +1,7 @@
 {
-	"firstname": "yohan",
-	"lastname": "Test",
-	"email": "yohan.test@gmail.com"
+	"firstname": "one",
+	"lastname": "Plus",
+	"email": "one@gmail.com",
+	"pseudo": "oplus",
+	"ssh_public_key": "ssh-rsa AAAAB__ONE"
 }

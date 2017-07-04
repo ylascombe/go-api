@@ -2,7 +2,7 @@ package gorm_custom
 
 import "time"
 
-// XXX This Struct override gotm.Model one. Override it is required since the gorm.Model one does not specify how to JSON/YAML marshallize
+// XXX This Struct override gorm.Model one. Override it is required since the gorm.Model one does not specify how to JSON/YAML marshallize
 // time.Time fields.
 // In this version, fields are just ignored (thanks to the '-' key)
 

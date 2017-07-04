@@ -2,20 +2,21 @@ package services
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/ylascombe/go-api/database"
+	"arc-api/database"
 	"testing"
 	"fmt"
-	"github.com/ylascombe/go-api/models"
+	"arc-api/models"
 )
 
 var (
 	email = "john@doe.org"
 	firstName = "john"
 	lastName = "doe"
+	pseudo = "jdoe"
 	sshPubKey = "ssh-rsa XYZ"
 )
 
-func TestCreateApiUser(t *testing.T) {
+func TestCreateUser(t *testing.T) {
 
 	// arrange
 	var countBefore int
@@ -23,13 +24,13 @@ func TestCreateApiUser(t *testing.T) {
 
 	db := database.NewDBDriver()
 	defer db.Close()
-	db.Model(&models.ApiUser{}).Count(&countBefore)
+	db.Model(&models.User{}).Count(&countBefore)
 
 	// act
-	user, err := CreateApiUser(firstName, lastName, email, sshPubKey)
+	user, err := CreateUserFromFields(firstName, lastName, pseudo, email, sshPubKey)
 
 	// assert
-	db.Model(&models.ApiUser{}).Count(&countAfter)
+	db.Model(&models.User{}).Count(&countAfter)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, user)
@@ -39,26 +40,26 @@ func TestCreateApiUser(t *testing.T) {
 	assert.Equal(t, lastName, user.Lastname)
 	assert.Equal(t, sshPubKey, user.SshPublicKey)
 
-	tearDownApiUser(t)
+	tearDownUser(t)
 }
 
-func TestListApiUserWhenNoUser(t *testing.T) {
+func TestListUserWhenNoUser(t *testing.T) {
 
 	// act
-	users, err := ListApiUser()
+	users, err := ListUser()
 
 	// assert
 	assert.Nil(t, err)
 	assert.Equal(t, 0, len(users.List))
 }
 
-func TestListApiUserWhenOneUser(t *testing.T) {
+func TestListUserWhenOneUser(t *testing.T) {
 
 	// arrange
-	CreateApiUser(firstName, lastName, email, sshPubKey)
+	CreateUserFromFields(firstName, lastName, pseudo, email, sshPubKey)
 
 	// act
-	users, err := ListApiUser()
+	users, err := ListUser()
 
 	// assert
 	assert.Nil(t, err)
@@ -67,30 +68,30 @@ func TestListApiUserWhenOneUser(t *testing.T) {
 	assert.Equal(t, email, users.List[0].Email)
 
 	// clean
-	tearDownApiUser(t)
+	tearDownUser(t)
 }
 
-func TestGetApiUserWhenUserIsAbsent(t *testing.T) {
+func TestGetUserWhenUserIsAbsent(t *testing.T) {
 
 	// act
-	user, err := GetApiUser(99999999)
+	user, err := GetUser(99999999)
 
 	// assert
 	assert.NotNil(t, err)
 	assert.Nil(t, user)
 }
 
-func tearDownApiUser(t *testing.T) {
+func tearDownUser(t *testing.T) {
 
 	// remove user in order to not change initial state
 	db := database.NewDBDriver()
 	defer db.Close()
 	//db.Delete(user)
-	res1 := db.Exec("delete from api_users").Error
+	res1 := db.Exec("delete from users").Error
 
 	if res1 != nil {
 		panic(fmt.Sprintf(
-			"db error: api_users=%s",
+			"db error: users=%s",
 			res1))
 	}
 }

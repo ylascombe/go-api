@@ -2,9 +2,10 @@ package services
 
 import (
 	"errors"
-	"github.com/ylascombe/go-api/database"
-	"github.com/ylascombe/go-api/models"
+	"arc-api/database"
+	"arc-api/models"
 	"fmt"
+	"bytes"
 )
 
 func ListEnvironment() (*[]models.Environment, error) {
@@ -17,23 +18,28 @@ func ListEnvironment() (*[]models.Environment, error) {
 	return &environments, err
 }
 
-func CreateEnvironment(name string) (models.Environment, error) {
+func CreateEnvironment(name string) (*models.Environment, error) {
 	env := models.Environment{Name: name}
 
 	db := database.NewDBDriver()
 	defer db.Close()
 
 	err := db.Create(&env).Error
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
 
-	return env, err
+	if err == nil {
+		err = db.First(&env).Error
+	}
+
+	if err != nil {
+		return nil, err
+	} else {
+		return &env, nil
+	}
 }
 
-func GiveAccessTo(env models.Environment, user models.ApiUser) (*models.EnvironmentAccess, error) {
+func GiveAccessTo(env models.Environment, user models.User) (*models.EnvironmentAccess, error) {
 
-	envAccess := models.EnvironmentAccess{ApiUser: user, ApiUserID:user.ID, Environment: env, EnvironmentID: env.ID}
+	envAccess := models.EnvironmentAccess{User: user, UserID:user.ID, Environment: env, EnvironmentID: env.ID}
 
 	return CreateEnvironmentAccess(&envAccess)
 }
@@ -58,7 +64,7 @@ func AddEnvironmentAccess(userID uint, envName string) error {
 		return err
 	}
 
-	apiUser, err := GetApiUser(userID)
+	user, err := GetUser(userID)
 
 	if err != nil {
 		return err
@@ -67,8 +73,9 @@ func AddEnvironmentAccess(userID uint, envName string) error {
 	environmentAccess := models.EnvironmentAccess{
 		EnvironmentID: environment.ID,
 		Environment: *environment,
-		ApiUserID: userID,
-		ApiUser: *apiUser}
+		UserID: userID,
+		User: *user,
+		}
 	_, err = CreateEnvironmentAccess(&environmentAccess)
 
 	if err != nil {
@@ -77,10 +84,9 @@ func AddEnvironmentAccess(userID uint, envName string) error {
 	return nil
 }
 
-func ListAccessForEnvironment(envName string) (*models.EnvironmentAccesses, error) {
+func ListAccessForEnvironment(envName string) (*[]models.EnvironmentAccess, error) {
 
-	array := []models.EnvironmentAccess{}
-	envAccesses := models.EnvironmentAccesses{List: array}
+	var envAccesses []models.EnvironmentAccess
 
 	db := database.NewDBDriver()
 	defer db.Close()
@@ -91,7 +97,7 @@ func ListAccessForEnvironment(envName string) (*models.EnvironmentAccesses, erro
 		return nil, err
 	}
 
-	err = db.Model(environment).Related(&envAccesses.List).Error
+	err = db.Model(*environment).Related(&envAccesses).Error
 
 	if err != nil {
 		return nil, err
@@ -99,25 +105,25 @@ func ListAccessForEnvironment(envName string) (*models.EnvironmentAccesses, erro
 
 	// load "manually" each item in list
 	// TODO manage better error
-	for i := 0; i< len(envAccesses.List); i++ {
+	for i := 0; i< len(envAccesses); i++ {
 
-		var apiUser models.ApiUser
+		var user models.User
 
-		err = db.First(&apiUser, envAccesses.List[i].ApiUserID).Error
+		err = db.First(&user, envAccesses[i].UserID).Error
 
 		if err != nil {
 			return nil, err
 		}
 
-		envAccesses.List[i].ApiUser = apiUser
+		envAccesses[i].User = user
 
 		var env models.Environment
-		err = db.First(&env, envAccesses.List[i].EnvironmentID).Error
+		err = db.First(&env, envAccesses[i].EnvironmentID).Error
 
 		if err != nil {
 			return nil, err
 		}
-		envAccesses.List[i].Environment = env
+		envAccesses[i].Environment = env
 	}
 
 	return &envAccesses, nil
@@ -165,4 +171,42 @@ func GetEnvironment(id uint) (*models.Environment, error) {
 	}
 
 	return &environment, nil
+}
+
+func ListSshPublicKeyForEnv(envName string) (*string, error) {
+
+	environment, err := GetEnvironmentByName(envName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	envAccesses := []models.EnvironmentAccess{}
+
+	db := database.NewDBDriver()
+	defer db.Close()
+
+
+	err = db.Model(environment).Related(&envAccesses).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	var buffer bytes.Buffer
+
+	for i:=0; i< len(envAccesses); i++ {
+
+		user, err := GetUser(envAccesses[i].UserID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		buffer.WriteString(user.SshPublicKey + " " + user.Pseudo + "\n")
+	}
+
+	result := buffer.String()
+	return &result, nil
+
 }

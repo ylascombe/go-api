@@ -1,67 +1,72 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/ylascombe/go-api/config"
-	"github.com/ylascombe/go-api/models"
-	"github.com/ylascombe/go-api/services"
-	"github.com/ylascombe/go-api/utils"
-	"html"
-	"log"
-	"net/http"
-	"strconv"
-	"github.com/ylascombe/go-api/controllers"
+	"arc-api/controllers"
+	"arc-api/database"
+	"github.com/itsjamie/gin-cors"
+	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func main() {
 
-	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", Index)
-	router.HandleFunc("/reactive-platform/target/{target}/manifestversion/{version}", controllers.GetManifest)
+	db := database.NewDBDriver()
+	database.AutoMigrateDB(db)
 
-	router.HandleFunc("/v1/environment", controllers.Environment)
-	router.HandleFunc("/v1/environment/{name}", controllers.Environment)
+	router := gin.New()
+	// Apply the middleware to the router (works with groups too)
+	router.Use(cors.Middleware(cors.Config{
+		Origins:        "*",
+		Methods:        "GET, PUT, POST, DELETE",
+		RequestHeaders: "Origin, Authorization, Content-Type",
+		ExposedHeaders: "",
+		MaxAge: 50 * time.Second,
+		Credentials: true,
+		ValidateHeaders: false,
+	}))
 
-	router.HandleFunc("/v1/user", controllers.User)
 
-	router.HandleFunc("/v1/environmentAccess/{name}", controllers.EnvironmentAccess)
-	router.HandleFunc("/v1/environmentAccess/{name}/user/{userID}", controllers.EnvironmentAccess)
+	users := router.Group("/v1/users")
+	{
+		users.GET("/", controllers.FetchAllUsers)
+		//users.GET("/:name", controllers.GetUser)
+		users.POST("/", controllers.CreateUser)
+	}
 
-	//router.HandleFunc("/manifests", handleListManifests).Methods("GET")
+	environments := router.Group("/v1/environments")
+	{
+		environments.GET("/", controllers.FetchAllEnvironments)
+		environments.GET("/:env-name", controllers.GetEnvironment)
+		environments.POST("/:env-name", controllers.CreateEnvironment)
+	}
 
-	// TODO remove me when tests done
-	router.HandleFunc("/testCommands", controllers.LaunchCommand)
+	environmentsAccess := router.Group("/v1/environments/:env-name/access")
+	{
+		environmentsAccess.GET("/", controllers.GetEnvironmentAccess )
+		//environmentsAccess.GET("/:name", controllers.GetEnvironmentAccess)
+		environmentsAccess.POST("/:user-id", controllers.CreateEnvironmentAccess)
+	}
 
-	// XXX keep it at the end of this function
-	log.Fatal(http.ListenAndServe(":8080", router))
+	environmentsAccessKey := router.Group("/v1/ssh-keys")
+	{
+		environmentsAccessKey.GET("/:env-name", controllers.SSHPublicKeysForEnv)
+	}
+
+	featureTeams := router.Group("/v1/teams")
+	{
+		featureTeams.GET("/", controllers.FetchAllFeatureTeams)
+		//featureTeams.GET("/:name", controllers.GetFeatureTeam)
+		//featureTeams.POST("/:name", controllers.CreateFeatureTeam)
+		featureTeams.POST("/", controllers.CreateFeatureTeam)
+	}
+
+	membership := router.Group("/v1/teams/:team-name/user")
+	{
+		membership.GET("/", controllers.FetchAllMember)
+		//featureTeams.GET("/:name", controllers.GetFeatureTeam)
+		//featureTeams.POST("/:name", controllers.CreateFeatureTeam)
+		membership.POST("/:user-id", controllers.CreateMembership)
+	}
+
+	router.Run(":8090")
 }
-
-func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
-}
-
-
-// TODO comprendre pourquoi cette factorisation ne marche pas (c'est problème l'interface Validable)
-//func readObjectAndCallCreateFunction(toCreate models.Validable, fct func(models.Validable) (models.Validable, error), writer http.ResponseWriter, request *http.Request) {
-//
-//	utils.ReadObjectFromJSONInput(&toCreate, writer, request)
-//
-//	if toCreate.IsValid() {
-//		_, err := fct(toCreate)
-//		if err == nil {
-//			writer.WriteHeader(200)
-//		} else {
-//			writer.WriteHeader(409)
-//			resp := controllers.ApiResponse{ErrorMessage: string(err.Error())}
-//			text := utils.Marshall(resp)
-//			fmt.Fprintf(writer, text)
-//		}
-//	} else {
-//		writer.WriteHeader(400)
-//		resp := controllers.ApiResponse{ErrorMessage: "Given parameters are empty or not valid"}
-//		text := utils.Marshall(resp)
-//		fmt.Fprintf(writer, text)
-//	}
-//}

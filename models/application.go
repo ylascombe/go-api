@@ -2,6 +2,7 @@ package models
 
 type Application struct {
 	Name  string `json:"name" yaml:"name"`
-	Spark Spark  `json:"spark" yaml:"spark"`
-	Api   Api    `json:"api" yaml:"api"`
+	AppModules []AppModule  `json:"appModules" yaml:"appModules"`
+	FeatureTeam FeatureTeam `gorm:"ForeignKey:FeatureTeamID"`
+	FeatureTeamID uint
 }

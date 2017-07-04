@@ -1,0 +1,17 @@
+{
+  "ID": 27,
+  "ApiUser": {
+    "ID": 203,
+    "firstname": "john",
+    "lastname": "doe",
+    "email": "john@doe.org",
+    "ssh_public_key": "ssh-rsa XYZ",
+    "pseudo": "jdoe"
+  },
+  "ApiUserID": 203,
+  "FeatureTeam": {
+    "ID": 68,
+    "name": "ftref"
+  },
+  "FeatureTeamID": 68
+}

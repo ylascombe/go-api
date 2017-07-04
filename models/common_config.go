@@ -1,6 +1,9 @@
 package models
 
+import "arc-api/gorm_custom"
+
 type CommonConfig struct {
-	Id   int `gorm:"AUTO_INCREMENT"`
+	gorm_custom.GormModelCustom
+
 	Json string
 }

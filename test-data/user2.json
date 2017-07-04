@@ -1,0 +1,7 @@
+{
+	"firstname": "two",
+	"lastname": "Bar",
+	"email": "two@gmail.com",
+	"pseudo": "tbar",
+	"ssh_public_key": "ssh-rsa AAAAB__TWO"
+}

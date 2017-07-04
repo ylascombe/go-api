@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/ylascombe/go-api/models"
+	"arc-api/models"
 	"testing"
 )
 
@@ -16,13 +16,13 @@ func TestInsert(t *testing.T) {
 	defer db.Close()
 
 	// Migrate the schema
-	db.AutoMigrate(&models.ApiUser{})
+	db.AutoMigrate(&models.User{})
 
 	// Create
-	db.Create(&models.ApiUser{Firstname: "Yohan", Lastname: "Test", Email: email})
+	db.Create(&models.User{Firstname: "Yohan", Lastname: "Test", Email: email})
 
 	// Read
-	var user models.ApiUser
+	var user models.User
 	db.First(&user, "Firstname = ?", "Yohan") // find product with FirstName Yohan
 
 	// Update - update product's price to 2000
@@ -48,6 +48,6 @@ func TestTearDown(t *testing.T) {
 	db := NewDBDriver()
 	defer db.Close()
 	//db.Delete(user)
-	res := db.Exec("delete from api_users where email = ?", email).Error
+	res := db.Exec("delete from users where email = ?", email).Error
 	assert.Nil(t, res)
 }

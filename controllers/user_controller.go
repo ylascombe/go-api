@@ -2,63 +2,67 @@ package controllers
 
 import (
 	"fmt"
-	"encoding/json"
 	"net/http"
-	"github.com/ylascombe/go-api/services"
-	"github.com/ylascombe/go-api/utils"
-	"github.com/ylascombe/go-api/models"
+	"arc-api/services"
+	"arc-api/models"
+	"github.com/gin-gonic/gin"
 )
 
-func User(writer http.ResponseWriter, req *http.Request) {
-	fmt.Println(req.Method)
-	switch req.Method {
-	case "GET":
-		listUsers(writer, req)
-	case "POST":
-		createUser(writer, req)
-	}
-}
+func FetchAllUsers(c *gin.Context) {
+	var users *models.Users
+	var _users []models.TransformedUser
 
-func listUsers(writer http.ResponseWriter, r *http.Request) {
-	users, err := services.ListApiUser()
+	users, err := services.ListUser()
 
-	if err == nil {
-		// YAML Marshalling : text := utils.Marshall(users)
-		text, err := json.Marshal(users)
-
-		if err == nil {
-			writer.WriteHeader(200)
-			fmt.Fprintf(writer, string(text))
-			return
-		}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status" : http.StatusInternalServerError,
+			"error message" : err,
+		})
+		return
 	}
 
-	// if this code is executed, so there is an error
-	writer.WriteHeader(500)
-	resp := ApiResponse{ErrorMessage: string(err.Error())}
-	text := utils.Marshall(resp)
-	fmt.Fprintf(writer, text)
+	if (len(users.List) <= 0) {
+		// choice : if no user found, return a HTTP status code 200 with an empty array
+		_users = make([]models.TransformedUser, 0)
+	}
 
+	//transforms the users
+	for _, item := range users.List {
+		_users = append(_users, *models.TransformUser(item))
+	}
+	c.JSON(http.StatusOK, _users)
 }
 
-func createUser(writer http.ResponseWriter, request *http.Request) {
-	var user models.ApiUser
-	utils.ReadObjectFromJSONInput(&user, writer, request)
+func CreateUser(c *gin.Context) {
 
-	if user.IsValid() {
-		_, err := services.CreateUser(user)
-		if err == nil {
-			writer.WriteHeader(200)
-		} else {
-			writer.WriteHeader(409)
-			resp := ApiResponse{ErrorMessage: string(err.Error())}
-			text := utils.Marshall(resp)
-			fmt.Fprintf(writer, text)
-		}
+	var json models.User
+
+	err := c.BindJSON(&json)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status" : http.StatusBadRequest,
+			"message" : "Invalid request.",
+			"error detail": err,
+		})
 	} else {
-		writer.WriteHeader(400)
-		resp := ApiResponse{ErrorMessage: "Given parameters are empty or not valid"}
-		text := utils.Marshall(resp)
-		fmt.Fprintf(writer, text)
+		user, err := services.CreateUser(json)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status" : http.StatusInternalServerError,
+				"message" : "Error while creating user",
+				"error detail": err,
+			})
+		} else {
+			c.JSON(http.StatusCreated, gin.H{
+				"status" : http.StatusCreated,
+				"message" : "User created successfully!",
+				"user_id": user.ID,
+				"Location": fmt.Sprintf("/v1/user/%v", user.ID),
+			})
+		}
 	}
+
+
 }
